@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Authentication\RequestPasswordReset\" />
+    <Folder Include="Features\Authentication\ResetPassword\" />
+    <Folder Include="Features\Transactions\CreateTransactionReport\" />
+    <Folder Include="Features\UserEvents\ListUserEvents\" />
+    <Folder Include="Features\UserEvents\ViewUserEvent\" />
+    <Folder Include="Features\InventoryItems\ModifyItemInformation\" />
+    <Folder Include="Features\InventoryItems\AddItems\" />
+    <Folder Include="Features\InventoryItems\RetrieveItems\" />
+    <Folder Include="Features\Users\ModifyPrivileges\" />
+    <Folder Include="Features\Users\ListUsers\" />
+    <Folder Include="Features\Users\ModifyPassword\" />
+    <Folder Include="Features\Users\RemoveUser\" />
+    <Folder Include="Features\Users\ViewUser\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentResults" Version="3.16.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.2.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.2.0" />
+  </ItemGroup>
+
+</Project>
