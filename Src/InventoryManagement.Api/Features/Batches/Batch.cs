@@ -15,18 +15,21 @@ public class Batch
     public static Batch Create(
         string batchNumber,
         InventoryItem inventoryItem,
+        int batchSize,
         decimal costPerUnit)
     {
-        return new(batchNumber, inventoryItem, costPerUnit);
+        return new(batchNumber, inventoryItem, batchSize, costPerUnit);
     }
 
     private Batch(
         string batchNumber,
         InventoryItem inventoryItem,
+        int batchSize,
         decimal costPerUnit)
     {
         BatchNumber = batchNumber;
         InventoryItem = inventoryItem;
+        BatchSize = batchSize;
         CostPerUnit = costPerUnit;
     }
 }

@@ -17,12 +17,6 @@ public class TransactionRecordModelConfiguration : IEntityTypeConfiguration<Tran
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(prop => prop.TransactionDoneBy)
-            .WithOne()
-            .HasForeignKey<TransactionRecord>()
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasOne(prop => prop.BatchOfItem)
             .WithOne()
             .HasForeignKey<TransactionRecord>()

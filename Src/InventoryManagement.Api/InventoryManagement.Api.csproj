@@ -9,13 +9,6 @@
   <ItemGroup>
     <Folder Include="Features\Authentication\RequestPasswordReset\" />
     <Folder Include="Features\Authentication\ResetPassword\" />
-    <Folder Include="Features\Transactions\CreateTransactionReport\" />
-    <Folder Include="Features\UserEvents\ListUserEvents\" />
-    <Folder Include="Features\UserEvents\ViewUserEvent\" />
-    <Folder Include="Features\InventoryItems\ModifyItemInformation\" />
-    <Folder Include="Features\InventoryItems\AddItems\" />
-    <Folder Include="Features\InventoryItems\RetrieveItems\" />
-    <Folder Include="Features\Users\ModifyPrivileges\" />
     <Folder Include="Features\Users\ListUsers\" />
     <Folder Include="Features\Users\ModifyPassword\" />
     <Folder Include="Features\Users\RemoveUser\" />
@@ -23,8 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
     <PackageReference Include="FluentResults" Version="3.16.0" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="MediatR" Version="12.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />

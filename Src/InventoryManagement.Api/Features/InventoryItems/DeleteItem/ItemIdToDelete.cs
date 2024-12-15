@@ -4,4 +4,4 @@ using MediatR;
 
 namespace InventoryManagement.Api.Features.InventoryItems.DeleteItem;
 
-public record ItemIdToDelete(Guid ItemId) : IRequest<Result>;
+public record ItemIdToDelete(string ItemId) : IRequest<Result>;

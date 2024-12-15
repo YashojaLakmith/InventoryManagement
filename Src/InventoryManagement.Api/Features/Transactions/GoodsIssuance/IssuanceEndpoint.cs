@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 
+using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Utilities;
 
 using MediatR;
@@ -13,20 +14,14 @@ public class IssuanceEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
         routeBuilder.MapPost(@"/api/v1/issue/", async (
-            [FromBody] GoodsIssueDto issuanceInfo,
+            [FromBody] IssuanceInformation issuanceInfo,
             HttpContext httpContext,
             ISender sender) =>
         {
-            string? userEmail = IdentityUtlility.ExtractEmailFromClaims(httpContext.User);
-            if (userEmail is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            Result transactionResult = await sender.Send(
-                new IssuanceInformation(issuanceInfo.ItemId, issuanceInfo.BatchNumber, issuanceInfo.NumberOfItemsToIssue, userEmail));
+            Result transactionResult = await sender.Send(issuanceInfo);
 
             return Results.Created();
-        });
+        })
+            .RequireAuthorization(policy => policy.RequireRole([Roles.Issuer, Roles.ScheduleManager]));
     }
 }

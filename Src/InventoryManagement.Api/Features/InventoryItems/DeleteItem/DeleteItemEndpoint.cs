@@ -12,8 +12,8 @@ public class DeleteItemEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapDelete(@"/api/v1/items/{itemId:guid}", async (
-            [FromRoute] Guid itemId,
+        routeBuilder.MapDelete(@"/api/v1/items/{itemId}", async (
+            [FromRoute] string itemId,
             ISender sender) =>
         {
             Result commandResult = await sender.Send(new ItemIdToDelete(itemId));

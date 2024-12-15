@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 
+using FluentValidation;
 using FluentValidation.Results;
 
 using InventoryManagement.Api.Features.Authentication.Errors;
@@ -16,20 +17,25 @@ public class LoginCommandHandler : IRequestHandler<LoginInformation, Result>
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ILogger<LoginCommandHandler> _logger;
+    private readonly IValidator<LoginInformation> _validator;
 
-    public LoginCommandHandler(UserManager<User> userManager, SignInManager<User> signInManager, ILogger<LoginCommandHandler> logger)
+    public LoginCommandHandler(
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
+        ILogger<LoginCommandHandler> logger,
+        IValidator<LoginInformation> validator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _validator = validator;
     }
 
     public async Task<Result> Handle(LoginInformation request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        LoginInformationValidator validator = new();
-        ValidationResult validationResult = validator.Validate(request);
+        ValidationResult validationResult = _validator.Validate(request);
         if (!validationResult.IsValid)
         {
             IEnumerable<string> errors = validationResult.Errors

@@ -1,7 +1,6 @@
 ﻿using InventoryManagement.Api.Features.Batches;
 using InventoryManagement.Api.Features.InventoryItems;
 using InventoryManagement.Api.Features.Transactions;
-using InventoryManagement.Api.Features.UserEvents;
 using InventoryManagement.Api.Features.Users;
 
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +12,6 @@ namespace InventoryManagement.Api.Infrastructure.Database;
 public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 {
     public DbSet<InventoryItem> InventoryItems { get; private set; }
-    public DbSet<UserEvent> UserEvents { get; private set; }
     public DbSet<Batch> Batches { get; private set; }
     public DbSet<TransactionRecord> TransactionRecords { get; private set; }
 

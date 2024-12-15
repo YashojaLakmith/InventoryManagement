@@ -11,7 +11,7 @@ public class UserModelConfiguration : IEntityTypeConfiguration<User>
     {
         builder.Property(prop => prop.Id)
             .IsRequired()
-            .UseSerialColumn();
+            .UseIdentityAlwaysColumn();
 
         builder.HasIndex(prop => prop.Email)
             .IsUnique();

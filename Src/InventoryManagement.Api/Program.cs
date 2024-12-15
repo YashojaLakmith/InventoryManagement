@@ -1,3 +1,7 @@
+using System.Reflection;
+
+using FluentValidation;
+
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Utilities;
@@ -11,11 +15,13 @@ public class Program
     public static async Task Main()
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
+        Assembly assembly = typeof(Program).Assembly;
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddDbContext<ApplicationDbContext>();
-        builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
+        builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
         ConfigureIdentity(builder.Services);
 
         WebApplication app = builder.Build();

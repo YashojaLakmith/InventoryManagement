@@ -1,8 +1,8 @@
 ﻿using InventoryManagement.Api.Utilities;
 
-namespace InventoryManagement.Api.Features.Users.CreateUser;
+namespace InventoryManagement.Api.Features.Batches.DeleteBatchLine;
 
-public class CreateUserEndpoint : IEndpoint
+public class DeleteBatchLineEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
