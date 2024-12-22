@@ -84,6 +84,7 @@ public class CreateTransactionReportQueryHandler : IRequestHandler<TransactionRe
         worksheet.Cell(@"A2").InsertData(dataTable);
         MemoryStream memoryStream = new();
         workbook.SaveAs(memoryStream);
+        memoryStream.Position = 0;
 
         return memoryStream;
     }

@@ -6,6 +6,10 @@ public class RequestPasswordResetQueryValidator : AbstractValidator<RequestPassw
 {
     public RequestPasswordResetQueryValidator()
     {
-        throw new NotImplementedException();
+        RuleFor(info => info.EmailAddress)
+            .NotNull()
+            .NotEmpty()
+            .EmailAddress()
+            .WithMessage(@"Email address should be a valid email.");
     }
 }

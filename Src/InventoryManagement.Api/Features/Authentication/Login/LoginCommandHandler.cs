@@ -2,7 +2,7 @@
 
 using FluentValidation;
 using FluentValidation.Results;
-
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Authentication.Errors;
 using InventoryManagement.Api.Features.Users;
 
@@ -38,15 +38,13 @@ public class LoginCommandHandler : IRequestHandler<LoginInformation, Result>
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errors = validationResult.Errors
-                .Select(err => err.ErrorMessage);
-            return Result.Fail(new InvalidLoginInformationError(errors));
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
         User? user = await _userManager.FindByEmailAsync(request.EmailAddress);
         if (user is null)
         {
-            return Result.Fail(new UserNotFoundError());
+            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.EmailAddress}");
         }
 
         SignInResult signInResult = await _signInManager.PasswordSignInAsync(user, request.Password, true, false);

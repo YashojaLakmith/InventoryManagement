@@ -30,10 +30,6 @@ namespace InventoryManagement.Api.Migrations
                     b.Property<string>("InventoryItemId")
                         .HasColumnType("varchar(25)");
 
-                    b.Property<int>("AvailableUnits")
-                        .HasPrecision(10)
-                        .HasColumnType("integer");
-
                     b.Property<int>("BatchSize")
                         .HasPrecision(10)
                         .HasColumnType("integer");
@@ -42,8 +38,18 @@ namespace InventoryManagement.Api.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
 
+                    b.Property<int>("IssuedUnits")
+                        .HasPrecision(10)
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReceivedUnits")
+                        .HasPrecision(10)
+                        .HasColumnType("integer");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bytea");
 
                     b.HasKey("BatchNumber", "InventoryItemId");

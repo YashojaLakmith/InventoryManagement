@@ -6,6 +6,6 @@ public class TransactionReportFilterValidator : AbstractValidator<TransactionRep
 {
     public TransactionReportFilterValidator()
     {
-        throw new NotImplementedException();
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -15,8 +16,29 @@ public class ResetPasswordEndpoint : IEndpoint
             {
                 Result resetResult = await sender.Send(resetData);
 
-                return Results.NoContent();
+                return resetResult.IsSuccess
+                    ? Results.NoContent()
+                    : MatchErrors(resetResult);
             })
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .Produces(StatusCodes.Status500InternalServerError)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<List<IError>>(StatusCodes.Status400BadRequest)
+            .Produces<List<IError>>(StatusCodes.Status404NotFound);
+    }
+
+    private static IResult MatchErrors(Result resetResult)
+    {
+        if (resetResult.HasError<NotFoundError>())
+        {
+            return Results.NotFound(resetResult.Errors);
+        }
+
+        if (resetResult.HasError<InvalidDataError>())
+        {
+            return Results.BadRequest(resetResult.Errors);
+        }
+        
+        return Results.StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

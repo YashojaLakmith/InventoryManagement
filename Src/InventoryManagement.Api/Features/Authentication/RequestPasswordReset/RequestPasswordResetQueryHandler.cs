@@ -34,14 +34,13 @@ public class RequestPasswordResetQueryHandler : IRequestHandler<RequestPasswordR
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
-            return Result.Fail(new InvalidDataError(errorMessages));
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
         User? existingUser = await _userManager.FindByEmailAsync(request.EmailAddress);
         if (existingUser is null)
         {
-            return Result.Fail(new NotFoundError(@"User with given email address"));
+            return NotFoundError.CreateFailureResultFromError($@"User with the email: {request.EmailAddress}");
         }
 
         await GenerateAndSendTokenAsync(existingUser);

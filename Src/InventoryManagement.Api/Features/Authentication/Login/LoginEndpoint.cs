@@ -1,5 +1,5 @@
 ﻿using FluentResults;
-
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Authentication.Errors;
 using InventoryManagement.Api.Utilities;
 
@@ -32,12 +32,21 @@ public class LoginEndpoint : IEndpoint
 
     private static IResult MatchErrors(Result loginResult)
     {
-        return loginResult.HasError<UserNotFoundError>()
-            ? Results.NotFound(loginResult.Errors)
-            : loginResult.HasError<IncorrectPasswordError>()
-                ? Results.BadRequest(loginResult.Errors)
-                : loginResult.HasError<InvalidLoginInformationError>()
-                    ? Results.BadRequest(loginResult.Errors)
-                    : Results.InternalServerError();
+        if (loginResult.HasError<NotFoundError>())
+        {
+            return Results.NotFound(loginResult.Errors);
+        }
+            
+        if (loginResult.HasError<IncorrectPasswordError>())
+        {
+            return Results.BadRequest(loginResult.Errors);
+        }
+            
+        if (loginResult.HasError<InvalidDataError>())
+        {
+            return Results.BadRequest(loginResult.Errors);
+        }
+        
+        return Results.InternalServerError();
     }
 }

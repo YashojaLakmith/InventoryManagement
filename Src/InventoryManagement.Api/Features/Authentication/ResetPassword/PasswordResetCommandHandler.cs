@@ -31,14 +31,13 @@ public class PasswordResetCommandHandler : IRequestHandler<PasswordResetTokenDat
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
-            return Result.Fail(new InvalidDataError(errorMessages));
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
         User? existingUser = await _userManager.FindByEmailAsync(request.EmailAddress);
         if (existingUser is null)
         {
-            return Result.Fail(new NotFoundError(@"User with the given email address"));
+            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.EmailAddress}");
         }
         
         IdentityResult result = await _userManager.ResetPasswordAsync(existingUser, request.ResetToken, request.NewPassword);
