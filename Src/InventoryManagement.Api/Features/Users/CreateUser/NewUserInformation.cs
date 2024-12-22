@@ -8,4 +8,4 @@ public record NewUserInformation(
     string UserName,
     string EmailAddress,
     string Password
-    ) : IRequest<Result>;
+    ) : IRequest<Result<int>>;

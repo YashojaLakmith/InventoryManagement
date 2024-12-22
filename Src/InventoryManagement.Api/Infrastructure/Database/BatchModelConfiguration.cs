@@ -35,5 +35,8 @@ public class BatchModelConfiguration : IEntityTypeConfiguration<Batch>
         builder.Property(prop => prop.AvailableUnits)
             .IsRequired()
             .HasPrecision(10, 0);
+
+        builder.Property<byte[]>(@"RowVersion")
+            .IsConcurrencyToken();
     }
 }

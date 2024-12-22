@@ -1,8 +1,8 @@
 ﻿using InventoryManagement.Api.Utilities;
 
-namespace InventoryManagement.Api.Features.Users.RemoveRoles;
+namespace InventoryManagement.Api.Features.Authentication.RequestPasswordReset;
 
-public class RemoveRoleEndpoint : IEndpoint
+public class RequestPasswordResetEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {

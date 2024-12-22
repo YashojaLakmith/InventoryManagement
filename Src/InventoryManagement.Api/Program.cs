@@ -4,6 +4,7 @@ using FluentValidation;
 
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
+using InventoryManagement.Api.Infrastructure.Email;
 using InventoryManagement.Api.Utilities;
 
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,7 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>();
         builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
         builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
+        builder.Services.AddSingleton<IEmailSender<User>, EmailSender>();
         ConfigureIdentity(builder.Services);
 
         WebApplication app = builder.Build();
@@ -52,7 +54,10 @@ public class Program
 
         services.Configure<IdentityOptions>(config =>
         {
-            config.Password.RequiredLength = 6;
+            config.Password.RequiredLength = 7;
+            config.Password.RequireNonAlphanumeric = false;
+            config.Password.RequireLowercase = true;
+            config.Password.RequireUppercase = true;
             config.User.RequireUniqueEmail = true;
         });
 

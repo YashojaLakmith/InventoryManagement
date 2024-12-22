@@ -6,6 +6,6 @@ public class DeleteBatchLineEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        throw new NotImplementedException();
+        
     }
 }

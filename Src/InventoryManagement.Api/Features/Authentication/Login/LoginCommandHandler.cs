@@ -35,7 +35,7 @@ public class LoginCommandHandler : IRequestHandler<LoginInformation, Result>
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = _validator.Validate(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
             IEnumerable<string> errors = validationResult.Errors

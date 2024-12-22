@@ -1,12 +1,10 @@
 ﻿using FluentResults;
-
 using FluentValidation;
 using FluentValidation.Results;
-
-using InventoryManagement.Api.Features.InventoryItems.Errors;
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Infrastructure.Database;
-
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.InventoryItems.DeleteItem;
 
@@ -30,21 +28,28 @@ public class DeleteItemCommandHandler : IRequestHandler<ItemIdToDelete, Result>
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = _validator.Validate(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            throw new NotImplementedException();
+            IEnumerable<string> errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
+            return Result.Fail(new InvalidDataError(errorMessages));
         }
 
-        InventoryItem? existingItem = await _dbContext.InventoryItems.FindAsync(request.ItemId);
+        InventoryItem? existingItem = await _dbContext.InventoryItems
+            .FirstOrDefaultAsync(item => item.InventoryItemId == request.ItemId, cancellationToken);
         if (existingItem is null)
         {
-            return Result.Fail(new ItemNotFoundError());
+            return Result.Fail(new NotFoundError(@$"Inventory item with id: {request.ItemId}"));
         }
 
-        _dbContext.InventoryItems.Remove(existingItem);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await RemoveFromDatabaseAsync(existingItem, cancellationToken);
 
         return Result.Ok();
+    }
+
+    private Task<int> RemoveFromDatabaseAsync(InventoryItem existingItem, CancellationToken cancellationToken)
+    {
+        _dbContext.InventoryItems.Remove(existingItem);
+        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

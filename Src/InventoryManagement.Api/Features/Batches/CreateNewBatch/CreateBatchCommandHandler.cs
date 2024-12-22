@@ -3,6 +3,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.InventoryItems;
 using InventoryManagement.Api.Infrastructure.Database;
 
@@ -32,16 +33,18 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = _validator.Validate(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            throw new NotImplementedException();
+            IEnumerable<string> errorMessages = validationResult.Errors.Select(error => error.ErrorMessage);
+            InvalidDataError invalidDataError = new(errorMessages);
+            return Result.Fail(invalidDataError);
         }
 
         bool isBatchNumberExist = await _dbContext.Batches.AnyAsync(batch => batch.BatchNumber == request.BatchNumber, cancellationToken);
         if (isBatchNumberExist)
         {
-            throw new NotImplementedException();
+            AlreadyExistsError alreadyExistsError = new(@"");
         }
 
         List<Batch> batches = [];

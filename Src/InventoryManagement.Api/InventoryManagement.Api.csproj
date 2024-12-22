@@ -4,11 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2d00ac61-c65c-449d-b6a3-c48eed40fbee</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Authentication\RequestPasswordReset\" />
-    <Folder Include="Features\Authentication\ResetPassword\" />
     <Folder Include="Features\Users\ListUsers\" />
     <Folder Include="Features\Users\ModifyPassword\" />
     <Folder Include="Features\Users\RemoveUser\" />

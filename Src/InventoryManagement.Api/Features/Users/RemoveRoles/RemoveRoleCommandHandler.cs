@@ -32,7 +32,7 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformation, R
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = _validator.Validate(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
             throw new NotImplementedException();

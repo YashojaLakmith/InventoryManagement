@@ -1,12 +1,14 @@
-﻿
-using FluentResults;
+﻿using FluentResults;
 
 using FluentValidation;
 using FluentValidation.Results;
 
+using InventoryManagement.Api.Errors;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.AssignRoles;
 
@@ -33,27 +35,37 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, R
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = _validator.Validate(request);
+        ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            throw new NotImplementedException();
+            IEnumerable<string> errors = validationResult.Errors.Select(e => e.ErrorMessage);
+            return Result.Fail(new InvalidDataError(errors));
         }
 
         User? existingUser = await _userManager.FindByEmailAsync(request.EmailAddress);
         if (existingUser is null)
         {
-            throw new NotImplementedException();
+            return Result.Fail(new NotFoundError(@"User with given email address."));
         }
 
-        foreach (string roleName in request.RolesToAssign)
+        HashSet<string?> existingRoles = await _roleManager.Roles
+            .AsNoTracking()
+            .Select(r => r.Name)
+            .ToHashSetAsync(cancellationToken);
+
+        string[] userProvidedRolesToUpperCase = request.RolesToAssign
+            .Select(r => r.ToUpper())
+            .ToArray();
+
+        foreach (string roleName in userProvidedRolesToUpperCase)
         {
-            if (!await _roleManager.RoleExistsAsync(roleName.ToUpper()))
+            if (!existingRoles.Contains(roleName))
             {
-                throw new NotImplementedException();
+                return Result.Fail(new NotFoundError(roleName));
             }
         }
 
-        await _userManager.AddToRolesAsync(existingUser, request.RolesToAssign.Select(role => role.ToUpper()));
+        await _userManager.AddToRolesAsync(existingUser, userProvidedRolesToUpperCase);
         return Result.Ok();
     }
 }

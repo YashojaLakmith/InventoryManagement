@@ -42,6 +42,10 @@ namespace InventoryManagement.Api.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bytea");
+
                     b.HasKey("BatchNumber", "InventoryItemId");
 
                     b.HasIndex("BatchNumber");
@@ -92,9 +96,6 @@ namespace InventoryManagement.Api.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("TransactionDoneById")
-                        .HasColumnType("integer");
-
                     b.Property<int>("TransactionUnitCount")
                         .HasPrecision(10)
                         .HasColumnType("integer");
@@ -104,18 +105,10 @@ namespace InventoryManagement.Api.Migrations
                     b.HasIndex("InventoryItemId")
                         .IsUnique();
 
-                    b.HasIndex("TransactionDoneById")
-                        .IsUnique();
-
                     b.HasIndex("BatchOfItemBatchNumber", "BatchOfItemInventoryItemId")
                         .IsUnique();
 
                     b.ToTable("TransactionRecords");
-                });
-
-            modelBuilder.Entity("InventoryManagement.Api.Features.UserEvents.UserEvent", b =>
-                {
-                    b.ToTable("UserEvents");
                 });
 
             modelBuilder.Entity("InventoryManagement.Api.Features.Users.User", b =>
@@ -124,7 +117,7 @@ namespace InventoryManagement.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseSerialColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
@@ -339,12 +332,6 @@ namespace InventoryManagement.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("InventoryManagement.Api.Features.Users.User", "TransactionDoneBy")
-                        .WithOne()
-                        .HasForeignKey("InventoryManagement.Api.Features.Transactions.TransactionRecord", "TransactionDoneById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("InventoryManagement.Api.Features.Batches.Batch", "BatchOfItem")
                         .WithOne()
                         .HasForeignKey("InventoryManagement.Api.Features.Transactions.TransactionRecord", "BatchOfItemBatchNumber", "BatchOfItemInventoryItemId")
@@ -354,8 +341,6 @@ namespace InventoryManagement.Api.Migrations
                     b.Navigation("BatchOfItem");
 
                     b.Navigation("InventoryItem");
-
-                    b.Navigation("TransactionDoneBy");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

@@ -7,7 +7,7 @@ public class RetrievalEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost(@"api/v1/issue/", async () =>
+        routeBuilder.MapPost(@"api/v1/receive/", async () =>
         {
 
         })
