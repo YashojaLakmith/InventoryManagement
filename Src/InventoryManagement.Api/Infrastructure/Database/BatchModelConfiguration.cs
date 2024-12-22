@@ -32,11 +32,16 @@ public class BatchModelConfiguration : IEntityTypeConfiguration<Batch>
             .IsRequired()
             .HasPrecision(10, 0);
 
-        builder.Property(prop => prop.AvailableUnits)
+        builder.Property(prop => prop.IssuedUnits)
+            .IsRequired()
+            .HasPrecision(10, 0);
+        
+        builder.Property(prop => prop.ReceivedUnits)
             .IsRequired()
             .HasPrecision(10, 0);
 
         builder.Property<byte[]>(@"RowVersion")
-            .IsConcurrencyToken();
+            .IsRequired()
+            .IsRowVersion();
     }
 }

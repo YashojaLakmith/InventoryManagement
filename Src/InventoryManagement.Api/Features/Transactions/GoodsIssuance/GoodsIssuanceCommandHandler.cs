@@ -2,8 +2,9 @@
 
 using FluentValidation;
 using FluentValidation.Results;
-
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Batches;
+using InventoryManagement.Api.Features.Transactions.TransactionErrors;
 using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
@@ -35,28 +36,52 @@ public class GoodsIssuanceCommandHandler : IRequestHandler<IssuanceInformation, 
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            throw new NotImplementedException();
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
+        const int maximumAttempts = 5;
+        for (int i = 0; i < maximumAttempts; i++)
+        {
+            try
+            {
+                return await TryExecutingTransactionAsync(request, cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _dbContext.ChangeTracker.Clear();
+                _logger.LogInformation(@"Concurrency violation. Trying to execute transaction using updated data.");
+            }
+        }
+
+        return ServerBusyError.CreateFailureResultFromError();
+    }
+
+    private async Task<Result> TryExecutingTransactionAsync(IssuanceInformation request, CancellationToken cancellationToken)
+    {
         Batch? existingBatch = await _dbContext.Batches
             .Include(batch => batch.InventoryItem)
             .FirstOrDefaultAsync(
-            batch => batch.BatchNumber == request.BatchNumber && batch.InventoryItem.InventoryItemId == request.ItemId, cancellationToken);
+                batch => batch.BatchNumber == request.BatchNumber
+                         && batch.InventoryItem.InventoryItemId == request.ItemId, cancellationToken);
 
         if (existingBatch is null)
         {
-            throw new NotImplementedException();
+            return NotFoundError.CreateFailureResultFromError(@$"Batch with number: {request.BatchNumber}");
         }
 
         Result<TransactionRecord> newTransaction = TransactionRecord.CreateGoodsIssuanceTransaction(existingBatch, request.NumberOfItemsToIssue);
         if (!newTransaction.IsSuccess)
         {
-            throw new NotImplementedException();
+            return InsufficientQuantityError.CreateFailureResultFromError(request.NumberOfItemsToIssue);
         }
 
-        _dbContext.TransactionRecords.Add(newTransaction.Value);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
+        await SaveChangesToDatabaseAsync(newTransaction.Value, cancellationToken);
         return Result.Ok();
+    }
+
+    private Task<int> SaveChangesToDatabaseAsync(TransactionRecord newTransaction, CancellationToken cancellationToken)
+    {
+        _dbContext.TransactionRecords.Add(newTransaction);
+        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

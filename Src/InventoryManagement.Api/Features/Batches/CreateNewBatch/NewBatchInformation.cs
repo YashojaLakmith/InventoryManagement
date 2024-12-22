@@ -6,5 +6,4 @@ namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public record NewBatchInformation(
     string BatchNumber,
-    IReadOnlyCollection<ItemOrder> ItemOrders,
-    string UserEmail) : IRequest<Result>;
+    IReadOnlyCollection<ItemOrder> ItemOrders) : IRequest<Result>;

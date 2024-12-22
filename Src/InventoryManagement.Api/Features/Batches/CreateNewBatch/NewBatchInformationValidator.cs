@@ -6,11 +6,6 @@ public class NewBatchInformationValidator : AbstractValidator<NewBatchInformatio
 {
     public NewBatchInformationValidator(IValidator<ItemOrder> validator)
     {
-        RuleFor(x => x.UserEmail)
-            .NotNull()
-            .NotEmpty()
-            .WithMessage(@"Email is required.");
-
         RuleFor(x => x.BatchNumber)
             .NotNull()
             .NotEmpty()

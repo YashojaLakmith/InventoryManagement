@@ -1,4 +1,6 @@
-﻿using InventoryManagement.Api.Features.InventoryItems;
+﻿using FluentResults;
+using InventoryManagement.Api.Features.InventoryItems;
+using InventoryManagement.Api.Features.Transactions;
 
 namespace InventoryManagement.Api.Features.Batches;
 
@@ -8,7 +10,8 @@ public class Batch
     public InventoryItem InventoryItem { get; private init; }
     public int BatchSize { get; private init; }
     public decimal CostPerUnit { get; private init; }
-    public int AvailableUnits { get; set; }
+    public int ReceivedUnits { get; set; }
+    public int IssuedUnits { get; set; }
 
     private Batch() { }
 
@@ -18,7 +21,7 @@ public class Batch
         int batchSize,
         decimal costPerUnit)
     {
-        return new(batchNumber, inventoryItem, batchSize, costPerUnit);
+        return new Batch(batchNumber, inventoryItem, batchSize, costPerUnit);
     }
 
     private Batch(

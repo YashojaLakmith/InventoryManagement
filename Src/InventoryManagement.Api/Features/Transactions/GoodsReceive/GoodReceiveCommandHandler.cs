@@ -2,8 +2,9 @@
 
 using FluentValidation;
 using FluentValidation.Results;
-
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Batches;
+using InventoryManagement.Api.Features.Transactions.TransactionErrors;
 using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
@@ -36,28 +37,52 @@ public class GoodReceiveCommandHandler : IRequestHandler<RetrievalInformation, R
 
         if (!validationResult.IsValid)
         {
-            throw new NotImplementedException();
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
+        const int maximumAttempts = 5;
+        for (int i = 0; i < maximumAttempts; i++)
+        {
+            try
+            {
+                return await TryExecutingRetrievalAsync(request, cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _dbContext.ChangeTracker.Clear();
+                _logger.LogInformation(@"Concurrency violation. Trying to execute transaction using updated data.");
+            }
+        }
+
+        return SurplusQuantityError.CreateFailureResultFromError();
+    }
+
+    private async Task<Result> TryExecutingRetrievalAsync(RetrievalInformation request, CancellationToken cancellationToken)
+    {
         Batch? existingBatch = await _dbContext.Batches
             .Include(batch => batch.InventoryItem)
             .FirstOrDefaultAsync(
-            batch => batch.BatchNumber == request.BatchNumber && batch.InventoryItem.InventoryItemId == request.InventoryItemNumber, cancellationToken);
+                batch => batch.BatchNumber == request.BatchNumber && batch.InventoryItem.InventoryItemId == request.InventoryItemNumber, cancellationToken);
 
         if (existingBatch is null)
         {
-            throw new NotImplementedException();
+            return NotFoundError.CreateFailureResultFromError($@"Batch with number: {request.BatchNumber}");
         }
 
         Result<TransactionRecord> newTransactionResult = TransactionRecord.CreateGoodsReceiveTransaction(existingBatch, request.ItemCount);
         if (newTransactionResult.IsFailed)
         {
-            throw new NotImplementedException();
+            return SurplusQuantityError.CreateFailureResultFromError();
         }
 
-        _dbContext.TransactionRecords.Add(newTransactionResult.Value);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await UpdateDatabase(newTransactionResult, cancellationToken);
 
         return Result.Ok();
+    }
+
+    private Task<int> UpdateDatabase(Result<TransactionRecord> newTransactionResult, CancellationToken cancellationToken)
+    {
+        _dbContext.TransactionRecords.Add(newTransactionResult.Value);
+        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
