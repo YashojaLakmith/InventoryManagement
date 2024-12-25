@@ -1,4 +1,4 @@
-﻿
+﻿using System.Security.Claims;
 using FluentResults;
 
 using InventoryManagement.Api.Errors;
@@ -16,9 +16,15 @@ public class AssignRolesEndpoint : IEndpoint
     {
         routeBuilder.MapPatch(@"api/v1/users/roles/", async (
             [FromBody] AssignRoleInformation assignRoleInformation,
+            ClaimsPrincipal user,
             ISender sender) =>
         {
-            Result result = await sender.Send(assignRoleInformation);
+            string invokerEmail = GetInvokerEmailAddress(user);
+            AssignRoleInformationWithInvoker information = new(
+                assignRoleInformation.EmailAddress,
+                invokerEmail,
+                assignRoleInformation.RolesToAssign);
+            Result result = await sender.Send(information);
 
             return result.IsSuccess 
                 ? Results.NoContent() 
@@ -33,15 +39,24 @@ public class AssignRolesEndpoint : IEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
     }
 
+    private static string GetInvokerEmailAddress(ClaimsPrincipal user)
+    {
+        return user.FindFirst(ClaimTypes.Email)?.Value!;
+    }
+
     private static IResult MatchErrors(Result result)
     {
         if (result.HasError<InvalidDataError>())
         {
             return Results.BadRequest(result.Errors);
         }
-        else if (result.HasError<NotFoundError>())
+        if (result.HasError<NotFoundError>())
         {
             return Results.NotFound(result.Errors);
+        }
+        if (result.HasError<UnauthorizedError>())
+        {
+            return Results.Forbid();
         }
 
         return Results.InternalServerError();

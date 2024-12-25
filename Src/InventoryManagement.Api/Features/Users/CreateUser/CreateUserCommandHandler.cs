@@ -35,22 +35,22 @@ public class CreateUserCommandHandler : IRequestHandler<NewUserInformation, Resu
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errors = validationResult.Errors.Select(e => e.ErrorMessage);
-            return Result.Fail(new InvalidDataError(errors));
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
         bool isEmailInUse = await _userManager.Users
-            .AnyAsync(user => user.Email!.Equals(request.EmailAddress, StringComparison.OrdinalIgnoreCase), cancellationToken);
+            .AnyAsync(user => 
+                user.Email!.Equals(request.EmailAddress, StringComparison.OrdinalIgnoreCase), cancellationToken);
         if (isEmailInUse)
         {
-            return Result.Fail(new AlreadyExistsError(@"User with given email."));
+            return AlreadyExistsError.CreateFailureResultFromError<int>($@"User with provided email address");
         }
 
         User newUser = User.Create(request.EmailAddress, request.UserName);
         IdentityResult identityResult = await _userManager.CreateAsync(newUser, request.Password);
 
         return !identityResult.Succeeded
-            ? Result.Fail(new AlreadyExistsError(@"User with given email."))
+            ? AlreadyExistsError.CreateFailureResultFromError<int>($@"User with provided email address")
             : Result.Ok(newUser.Id);
     }
 }

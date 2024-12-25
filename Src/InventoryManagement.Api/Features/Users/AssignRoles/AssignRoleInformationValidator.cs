@@ -6,8 +6,8 @@ public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInform
 {
     public AssignRoleInformationValidator()
     {
-        RuleFor(info => AreThereDuplicates(info.RolesToAssign))
-            .Equal(false)
+        RuleFor(info => info.RolesToAssign.Distinct().Count() == info.RolesToAssign.Count)
+            .Equal(true)
             .WithMessage(@"There are duplicates role names provided.");
 
         RuleFor(info => info.RolesToAssign.Count)
@@ -16,9 +16,10 @@ public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInform
 
         RuleFor(info => info.RolesToAssign.Count)
             .LessThanOrEqualTo(5)
-            .WithMessage(@"Maximum roles can be assigned is 5");
+            .WithMessage(@"Maximum roles can be assigned at a time is 5");
 
         RuleFor(info => info.EmailAddress)
+            .NotEmpty()
             .EmailAddress()
             .WithMessage(@"Email address must be a valid one.");
 
@@ -29,13 +30,9 @@ public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInform
         RuleForEach(info => info.RolesToAssign)
             .Length(1, 10)
             .WithMessage(@"Role name should have maximum character length of 10.");
-    }
-
-    private static bool AreThereDuplicates(IReadOnlyCollection<string> roleNames)
-    {
-        return roleNames
-            .Select(name => name.ToUpper())
-            .Distinct()
-            .Count() != roleNames.Count;
+        
+        RuleFor(info => info.RolesToAssign.Any(role => role.Contains(',')))
+            .Equal(false)
+            .WithMessage(@"Role name contains invalid characters.");
     }
 }

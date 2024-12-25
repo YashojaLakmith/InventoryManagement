@@ -19,20 +19,9 @@ public class CreateUserEndpoint : IEndpoint
         {
             Result<int> result = await sender.Send(newUserInformation);
 
-            if (result.IsSuccess)
-            {
-                return Results.CreatedAtRoute(@"/api/v1/users/", result.Value);
-            }
-            else if (result.HasError<InvalidDataError>())
-            {
-                return Results.BadRequest(result.Errors);
-            }
-            else if (result.HasError<AlreadyExistsError>())
-            {
-                return Results.BadRequest(result.Errors);
-            }
-
-            return Results.InternalServerError();
+            return result.IsSuccess 
+                ? Results.CreatedAtRoute(@"/api/v1/users/", result.Value) 
+                : MatchErrors(result);
         })
             .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.UserManager))
             .Produces(StatusCodes.Status201Created)
@@ -40,5 +29,19 @@ public class CreateUserEndpoint : IEndpoint
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status500InternalServerError)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest);
+    }
+
+    private static IResult MatchErrors(Result<int> result)
+    {
+        if (result.HasError<InvalidDataError>())
+        {
+            return Results.BadRequest(result.Errors);
+        }
+        if (result.HasError<AlreadyExistsError>())
+        {
+            return Results.BadRequest(result.Errors);
+        }
+
+        return Results.InternalServerError();
     }
 }
