@@ -1,12 +1,9 @@
 using System.Reflection;
-
 using FluentValidation;
-
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Email;
 using InventoryManagement.Api.Utilities;
-
 using Microsoft.AspNetCore.Identity;
 
 namespace InventoryManagement.Api;

@@ -13,6 +13,10 @@ public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInform
         RuleFor(info => info.RolesToAssign.Count)
             .GreaterThanOrEqualTo(1)
             .WithMessage(@"At least one role should be provided");
+        
+        RuleFor(info => info.RolesToAssign.Contains(Roles.SuperUser, StringComparer.OrdinalIgnoreCase))
+            .Equal(false)
+            .WithMessage(@"Super user roles are non-modifiable.");
 
         RuleFor(info => info.RolesToAssign.Count)
             .LessThanOrEqualTo(5)
