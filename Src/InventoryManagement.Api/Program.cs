@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Security.Claims;
-using System.Security.Principal;
+
 using FluentValidation;
+
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Email;
 using InventoryManagement.Api.Utilities;
+
 using Microsoft.AspNetCore.Identity;
 
 namespace InventoryManagement.Api;
@@ -50,7 +52,7 @@ public class Program
                 config.SlidingExpiration = true;
                 config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
             });
-        
+
         services.AddIdentityCore<User>(config =>
             {
                 config.Password.RequiredLength = 7;

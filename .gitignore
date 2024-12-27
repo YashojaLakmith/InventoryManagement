@@ -363,5 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Src/InventoryManagement.Api/Properties/serviceDependencies.json
 /Src/InventoryManagement.Api/Properties/serviceDependencies.local.json
-/Src/InventoryManagement.Api/Migrations
-/.idea/.idea.InventoryManagement/.idea
+/Src/InventoryManagement.Api/Migrations/
+/.idea/
