@@ -5,6 +5,6 @@ using MediatR;
 namespace InventoryManagement.Api.Features.Users.RemoveRoles;
 
 public record RemoveRoleInformation(
-    string EmailAddress,
+    int UserId,
     IReadOnlyCollection<string> RolesToRemove
-    );
+    ) : IRequest<Result>;

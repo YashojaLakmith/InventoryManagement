@@ -22,11 +22,6 @@ public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInform
             .Equal(false)
             .WithMessage(@"Super user roles are non-modifiable.");
 
-        RuleFor(info => info.EmailAddress)
-            .NotEmpty()
-            .EmailAddress()
-            .WithMessage(@"Email address must be a valid one.");
-
         RuleForEach(info => info.RolesToRemove)
             .NotEmpty()
             .WithMessage(@"Role name cannot be empty.");
@@ -34,9 +29,21 @@ public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInform
         RuleForEach(info => info.RolesToRemove)
             .Length(1, 10)
             .WithMessage(@"Role name should have maximum character length of 10.");
-        
+
         RuleFor(info => info.RolesToRemove.Any(role => role.Contains(',')))
             .Equal(false)
             .WithMessage(@"Role name contains invalid characters.");
+
+        RuleFor(info => info.UserId)
+            .NotEmpty()
+            .WithMessage("UserId cannot be empty");
+
+        RuleFor(info => info.UserId)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Invalid UserId");
+
+        RuleFor(info => info.UserId)
+            .LessThanOrEqualTo(int.MaxValue)
+            .WithMessage("Invalid UserId");
     }
 }

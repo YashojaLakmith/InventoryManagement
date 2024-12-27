@@ -1,8 +1,10 @@
-﻿using System.Security.Claims;
-using FluentResults;
+﻿using FluentResults;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Utilities;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement.Api.Features.Users.RemoveRoles;
@@ -11,19 +13,14 @@ public class RemoveRoleEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPatch(@"/api/v1/users/remove-roles/", async (
-            [FromBody] RemoveRoleInformation removeRoleInformation,
-            ClaimsPrincipal user,
+        routeBuilder.MapPatch(@"/api/v1/users/{userId:int}/remove-roles", async (
+            [FromRoute] int userId,
+            [FromQuery(Name = @"role")] string[] rolesToRemove,
             ISender sender) =>
         {
-            string invokerEmail = user.FindFirst(ClaimTypes.Email)!.Value;
-            RemoveRoleInformationWithInvoker request = new(
-                removeRoleInformation.EmailAddress,
-                invokerEmail,
-                removeRoleInformation.RolesToRemove);
-            
+            RemoveRoleInformation request = new(userId, rolesToRemove);
             Result requestResult = await sender.Send(request);
-            
+
             return requestResult.IsSuccess
                 ? Results.NoContent()
                 : MatchErrors(requestResult);
@@ -36,7 +33,7 @@ public class RemoveRoleEndpoint : IEndpoint
         .Produces(StatusCodes.Status403Forbidden)
         .Produces(StatusCodes.Status500InternalServerError);
     }
-    
+
     private static IResult MatchErrors(Result result)
     {
         if (result.HasError<InvalidDataError>())
