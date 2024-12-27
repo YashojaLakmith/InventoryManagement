@@ -25,5 +25,9 @@ public class NewUserInformationValidator : AbstractValidator<NewUserInformation>
         RuleFor(info => info.Password)
             .NotEmpty()
             .WithMessage(@"Password is required.");
+        
+        RuleFor(info => info.Password)
+            .Matches(@"^(?=.*[a-z])(?=.*[A-Z]).{7,15}$")
+            .WithMessage(@"Password must be between 7 and 15 characters in length and must contain at least one upper case and lowercase letter.");
     }
 }

@@ -22,5 +22,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql(@"Host=127.0.0.1;Database=InventoryManagement;Username=postgres;Password=postgres;");
+    {
+        optionsBuilder.UseNpgsql(@"Host=127.0.0.1;Database=InventoryManagement;Username=postgres;Password=postgres;");
+        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+    }
 }

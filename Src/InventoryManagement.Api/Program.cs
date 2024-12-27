@@ -1,12 +1,11 @@
 using System.Reflection;
-
+using System.Security.Claims;
+using System.Security.Principal;
 using FluentValidation;
-
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Email;
 using InventoryManagement.Api.Utilities;
-
 using Microsoft.AspNetCore.Identity;
 
 namespace InventoryManagement.Api;
@@ -20,11 +19,12 @@ public class Program
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        ConfigureAuthentication(builder.Services);
+        ConfigureClaimsPrincipalInjection(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
         builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
         builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
         builder.Services.AddSingleton<IEmailSender<User>, EmailSender>();
-        ConfigureIdentity(builder.Services);
 
         WebApplication app = builder.Build();
 
@@ -34,38 +34,44 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
-        app.MapSwagger().RequireAuthorization();
+        app.MapSwagger();
         app.AddApiEndpoints();
         await app.RunAsync();
     }
 
-    private static void ConfigureIdentity(IServiceCollection services)
+    private static void ConfigureAuthentication(IServiceCollection services)
     {
-        services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-        });
-
-        services.AddIdentity<User, IdentityRole<int>>()
+        services.AddAuthorization();
+        services.AddAuthentication()
+            .AddCookie(IdentityConstants.ApplicationScheme, config =>
+            {
+                config.Cookie.HttpOnly = true;
+                config.Cookie.IsEssential = true;
+                config.SlidingExpiration = true;
+                config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+            });
+        
+        services.AddIdentityCore<User>(config =>
+            {
+                config.Password.RequiredLength = 7;
+                config.Password.RequireNonAlphanumeric = false;
+                config.Password.RequireLowercase = true;
+                config.Password.RequireUppercase = true;
+                config.User.RequireUniqueEmail = true;
+            })
+            .AddRoles<IdentityRole<int>>()
+            .AddSignInManager<SignInManager<User>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+    }
 
-        services.Configure<IdentityOptions>(config =>
+    private static void ConfigureClaimsPrincipalInjection(IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ClaimsPrincipal>(serviceProvider =>
         {
-            config.Password.RequiredLength = 7;
-            config.Password.RequireNonAlphanumeric = false;
-            config.Password.RequireLowercase = true;
-            config.Password.RequireUppercase = true;
-            config.User.RequireUniqueEmail = true;
-        });
-
-        services.ConfigureApplicationCookie(config =>
-        {
-            config.Cookie.HttpOnly = true;
-            config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            config.SlidingExpiration = true;
+            IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            return httpContextAccessor.HttpContext!.User;
         });
     }
 }

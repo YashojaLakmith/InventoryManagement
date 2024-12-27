@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.AssignRoles;
 
-public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, Result>
+public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformationWithInvoker, Result>
 {
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole<int>> _roleManager;
@@ -31,29 +31,54 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, R
         _logger = logger;
     }
 
-    public async Task<Result> Handle(AssignRoleInformation request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AssignRoleInformationWithInvoker request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errors = validationResult.Errors.Select(e => e.ErrorMessage);
-            return Result.Fail(new InvalidDataError(errors));
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
+        }
+
+        User? invokingUser = await _userManager.FindByEmailAsync(request.InvokerEmailAddress);
+        if (invokingUser is null)
+        {
+            return NotFoundError.CreateFailureResultFromError(@"Invoking user");
         }
 
         User? existingUser = await _userManager.FindByEmailAsync(request.EmailAddress);
         if (existingUser is null)
         {
-            return Result.Fail(new NotFoundError(@"User with given email address."));
+            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.EmailAddress}");
         }
 
-        HashSet<string?> existingRoles = await _roleManager.Roles
+        bool isInvokerASuperUser = await _userManager.IsInRoleAsync(invokingUser, Roles.SuperUser);
+        if (isInvokerASuperUser)
+        {
+            return await AssignRolesToExistingUserAsync(request.RolesToAssign, existingUser, cancellationToken);
+        }
+
+        if (request.RolesToAssign.Contains(Roles.SuperUser, StringComparer.OrdinalIgnoreCase) 
+            || request.RolesToAssign.Contains(Roles.UserManager, StringComparer.OrdinalIgnoreCase))
+        {
+            return UnauthorizedError.CreateFailureResultFromError();
+        }
+        
+        return await AssignRolesToExistingUserAsync(request.RolesToAssign, existingUser, cancellationToken);
+    }
+
+    private async Task<Result> AssignRolesToExistingUserAsync(
+        IReadOnlyCollection<string> roles,
+        User existingUser,
+        CancellationToken cancellationToken)
+    {
+        HashSet<string> existingRoles = await _roleManager.Roles
             .AsNoTracking()
-            .Select(r => r.Name)
+            .Select(r => r.Name!)
             .ToHashSetAsync(cancellationToken);
 
-        string[] userProvidedRolesToUpperCase = request.RolesToAssign
+        string[] userProvidedRolesToUpperCase = roles
             .Select(r => r.ToUpper())
             .ToArray();
 
@@ -61,7 +86,7 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, R
         {
             if (!existingRoles.Contains(roleName))
             {
-                return Result.Fail(new NotFoundError(roleName));
+                return NotFoundError.CreateFailureResultFromError(roleName);
             }
         }
 
