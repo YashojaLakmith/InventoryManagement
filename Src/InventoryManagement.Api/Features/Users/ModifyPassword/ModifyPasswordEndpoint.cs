@@ -1,8 +1,10 @@
-﻿using System.Security.Claims;
-using FluentResults;
+﻿using FluentResults;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Utilities;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement.Api.Features.Users.ModifyPassword;
@@ -12,17 +14,10 @@ public class ModifyPasswordEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
         routeBuilder.MapPatch(@"/api/v1/users/modify-password", async (
-            [FromBody] ModifyPasswordInformation userInformation,
-            ISender sender,
-            ClaimsPrincipal user) =>
+            [FromBody] ModifyPasswordInformation passwordInformation,
+            ISender sender) =>
         {
-            string invokerEmail = GetInvokingUserEmail(user);
-            ModifyPasswordInformationWithInvoker modifyDetails = new(
-                userInformation.CurrentPassword,
-                userInformation.NewPassword,
-                invokerEmail);
-
-            Result modificationResult = await sender.Send(modifyDetails);
+            Result modificationResult = await sender.Send(passwordInformation);
 
             return modificationResult.IsSuccess
                 ? Results.NoContent()
@@ -36,11 +31,6 @@ public class ModifyPasswordEndpoint : IEndpoint
         .Produces(StatusCodes.Status500InternalServerError);
     }
 
-    private static string GetInvokingUserEmail(ClaimsPrincipal user)
-    {
-        return user.FindFirstValue(ClaimTypes.Email)!;
-    }
-    
     private static IResult MatchErrors(Result result)
     {
         if (result.HasError<InvalidDataError>())
