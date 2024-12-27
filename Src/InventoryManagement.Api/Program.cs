@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Security.Claims;
+using System.Security.Principal;
 using FluentValidation;
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
@@ -18,6 +20,7 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         ConfigureAuthentication(builder.Services);
+        ConfigureClaimsPrincipalInjection(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
         builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
         builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
@@ -60,5 +63,15 @@ public class Program
             .AddSignInManager<SignInManager<User>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+    }
+
+    private static void ConfigureClaimsPrincipalInjection(IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ClaimsPrincipal>(serviceProvider =>
+        {
+            IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            return httpContextAccessor.HttpContext!.User;
+        });
     }
 }
