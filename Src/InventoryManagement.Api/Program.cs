@@ -37,7 +37,7 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.MapSwagger().RequireAuthorization();
+        app.MapSwagger();
         app.AddApiEndpoints();
         await app.UseDatabaseMigrationsAndSeeding();
         await app.RunAsync();
