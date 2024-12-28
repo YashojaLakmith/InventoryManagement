@@ -1,4 +1,6 @@
-﻿using FluentResults;
+﻿using System.Security.Claims;
+
+using FluentResults;
 
 using FluentValidation;
 using FluentValidation.Results;
@@ -12,9 +14,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.AssignRoles;
 
-public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformationWithInvoker, Result>
+public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, Result>
 {
     private readonly UserManager<User> _userManager;
+    private readonly ClaimsPrincipal _executingUser;
     private readonly RoleManager<IdentityRole<int>> _roleManager;
     private readonly IValidator<AssignRoleInformation> _validator;
     private readonly ILogger<AssignRoleCommandHandler> _logger;
@@ -23,15 +26,17 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformationWit
         UserManager<User> userManager,
         IValidator<AssignRoleInformation> validator,
         RoleManager<IdentityRole<int>> roleManager,
-        ILogger<AssignRoleCommandHandler> logger)
+        ILogger<AssignRoleCommandHandler> logger,
+        ClaimsPrincipal executingUser)
     {
         _userManager = userManager;
         _validator = validator;
         _roleManager = roleManager;
         _logger = logger;
+        _executingUser = executingUser;
     }
 
-    public async Task<Result> Handle(AssignRoleInformationWithInvoker request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AssignRoleInformation request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -41,31 +46,37 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformationWit
             return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
-        User? invokingUser = await _userManager.FindByEmailAsync(request.InvokerEmailAddress);
-        if (invokingUser is null)
+        User? executingUser = await GetExecutingUserAsync();
+        if (executingUser is null)
         {
             return NotFoundError.CreateFailureResultFromError(@"Invoking user");
         }
 
-        User? existingUser = await _userManager.FindByEmailAsync(request.EmailAddress);
+        User? existingUser = await _userManager.FindByIdAsync(request.UserId.ToString());
         if (existingUser is null)
         {
-            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.EmailAddress}");
+            return NotFoundError.CreateFailureResultFromError($@"User with Id: {request.UserId}");
         }
 
-        bool isInvokerASuperUser = await _userManager.IsInRoleAsync(invokingUser, Roles.SuperUser);
-        if (isInvokerASuperUser)
-        {
-            return await AssignRolesToExistingUserAsync(request.RolesToAssign, existingUser, cancellationToken);
-        }
+        bool isExecuterASuperUser = await _userManager.IsInRoleAsync(executingUser, Roles.SuperUser);
 
-        if (request.RolesToAssign.Contains(Roles.SuperUser, StringComparer.OrdinalIgnoreCase) 
-            || request.RolesToAssign.Contains(Roles.UserManager, StringComparer.OrdinalIgnoreCase))
-        {
-            return UnauthorizedError.CreateFailureResultFromError();
-        }
-        
-        return await AssignRolesToExistingUserAsync(request.RolesToAssign, existingUser, cancellationToken);
+        return isExecuterASuperUser
+            ? await AssignRolesToExistingUserAsync(request.RolesToAssign, existingUser, cancellationToken)
+            : IsUserASuperUserOrUserManager(request)
+            ? UnauthorizedError.CreateFailureResultFromError()
+            : await AssignRolesToExistingUserAsync(request.RolesToAssign, existingUser, cancellationToken);
+    }
+
+    private Task<User?> GetExecutingUserAsync()
+    {
+        string executingUserEmail = _executingUser.FindFirstValue(ClaimTypes.Email)!;
+        return _userManager.FindByEmailAsync(executingUserEmail);
+    }
+
+    private static bool IsUserASuperUserOrUserManager(AssignRoleInformation request)
+    {
+        return request.RolesToAssign.Contains(Roles.SuperUser, StringComparer.OrdinalIgnoreCase)
+                || request.RolesToAssign.Contains(Roles.UserManager, StringComparer.OrdinalIgnoreCase);
     }
 
     private async Task<Result> AssignRolesToExistingUserAsync(

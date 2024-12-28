@@ -5,6 +5,6 @@ using MediatR;
 namespace InventoryManagement.Api.Features.Users.AssignRoles;
 
 public record AssignRoleInformation(
-    string EmailAddress,
+    int UserId,
     IReadOnlyCollection<string> RolesToAssign
-    );
+    ) : IRequest<Result>;

@@ -1,9 +1,13 @@
-﻿using FluentResults;
+﻿using System.Security.Claims;
+
+using FluentResults;
 
 using FluentValidation;
 using FluentValidation.Results;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Infrastructure.Database;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Identity;
@@ -11,11 +15,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.RemoveRoles;
 
-public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformationWithInvoker, Result>
+public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformation, Result>
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole<int>> _roleManager;
+    private readonly ClaimsPrincipal _executingUser;
     private readonly ILogger<RemoveRoleCommandHandler> _logger;
     private readonly IValidator<RemoveRoleInformation> _validator;
 
@@ -23,17 +28,19 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformationWit
         UserManager<User> userManager,
         RoleManager<IdentityRole<int>> roleManager,
         ILogger<RemoveRoleCommandHandler> logger,
-        IValidator<RemoveRoleInformation> validator, 
-        ApplicationDbContext dbContext)
+        IValidator<RemoveRoleInformation> validator,
+        ApplicationDbContext dbContext,
+        ClaimsPrincipal executingUser)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _logger = logger;
         _validator = validator;
         _dbContext = dbContext;
+        _executingUser = executingUser;
     }
 
-    public async Task<Result> Handle(RemoveRoleInformationWithInvoker request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveRoleInformation request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -43,24 +50,24 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformationWit
             return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
-        User? existingUser = await _userManager.FindByEmailAsync(request.EmailAddress);
-        if (existingUser is null)
+        User? executingUser = await GetExecutingUserAsync();
+        if (executingUser is null)
         {
-            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.EmailAddress}");
+            return NotFoundError.CreateFailureResultFromError($@"You");
         }
-        
-        User? invokingUser = await _userManager.FindByEmailAsync(request.InvokerEmailAddress);
-        if (invokingUser is null)
+
+        User? targetUser = await _userManager.FindByIdAsync(request.UserId.ToString());
+        if (targetUser is null)
         {
-            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.InvokerEmailAddress}");
+            return NotFoundError.CreateFailureResultFromError($@"User with email: {request.UserId}");
         }
-        
-        if (await _userManager.IsInRoleAsync(existingUser, Roles.SuperUser))
+
+        if (await _userManager.IsInRoleAsync(targetUser, Roles.SuperUser))
         {
             return UnauthorizedError.CreateFailureResultFromError();
         }
-        
-        if (await AreBothUsersUserManagersAsync(existingUser, invokingUser))
+
+        if (await AreBothUsersUserManagersAsync(executingUser, targetUser))
         {
             return UnauthorizedError.CreateFailureResultFromError();
         }
@@ -76,17 +83,23 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformationWit
             }
         }
 
-        await _userManager.RemoveFromRolesAsync(existingUser, userProvidedRolesInUpperCase);
+        await _userManager.RemoveFromRolesAsync(targetUser, userProvidedRolesInUpperCase);
 
         return Result.Ok();
     }
 
-    private async Task<bool> AreBothUsersUserManagersAsync(User existingUser, User invokingUser)
+    private Task<User?> GetExecutingUserAsync()
     {
-        return await _userManager.IsInRoleAsync(existingUser, Roles.UserManager)
-               && await _userManager.IsInRoleAsync(invokingUser, Roles.UserManager);
+        string executingUserEmail = _executingUser.FindFirstValue(ClaimTypes.Email)!;
+        return _userManager.FindByEmailAsync(executingUserEmail);
     }
-    
+
+    private async Task<bool> AreBothUsersUserManagersAsync(User executingUser, User targetUser)
+    {
+        return await _userManager.IsInRoleAsync(executingUser, Roles.UserManager)
+               && await _userManager.IsInRoleAsync(targetUser, Roles.UserManager);
+    }
+
     private Task<HashSet<string>> GetExistingRoleNamesAsync(CancellationToken cancellationToken)
     {
         return _dbContext.Roles
@@ -94,8 +107,8 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformationWit
             .Select(role => role.Name!)
             .ToHashSetAsync(cancellationToken);
     }
-    
-    private static string[] ConvertRoleNamesToUppercase(RemoveRoleInformationWithInvoker request)
+
+    private static string[] ConvertRoleNamesToUppercase(RemoveRoleInformation request)
     {
         return request.RolesToRemove
             .Select(role => role.ToUpper())

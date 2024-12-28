@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using FluentResults;
+﻿using FluentResults;
 
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Utilities;
@@ -14,21 +13,17 @@ public class AssignRolesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPatch(@"api/v1/users/roles/", async (
-            [FromBody] AssignRoleInformation assignRoleInformation,
-            ClaimsPrincipal user,
+        routeBuilder.MapPatch(@"api/v1/users/{userId:int}/assign-roles", async (
+            [FromRoute] int userId,
+            [FromQuery(Name = @"rolename")] string[] rolesToAssign,
             ISender sender) =>
         {
-            string invokerEmail = GetInvokerEmailAddress(user);
-            AssignRoleInformationWithInvoker information = new(
-                assignRoleInformation.EmailAddress,
-                invokerEmail,
-                assignRoleInformation.RolesToAssign);
-            Result result = await sender.Send(information);
+            AssignRoleInformation request = new(userId, rolesToAssign);
+            Result requestResult = await sender.Send(request);
 
-            return result.IsSuccess 
-                ? Results.NoContent() 
-                : MatchErrors(result);
+            return requestResult.IsSuccess
+                ? Results.NoContent()
+                : MatchErrors(requestResult);
         })
             .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
             .Produces(StatusCodes.Status204NoContent)
@@ -37,11 +32,6 @@ public class AssignRolesEndpoint : IEndpoint
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status500InternalServerError);
-    }
-
-    private static string GetInvokerEmailAddress(ClaimsPrincipal user)
-    {
-        return user.FindFirst(ClaimTypes.Email)?.Value!;
     }
 
     private static IResult MatchErrors(Result result)

@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+
 using MediatR;
 
 namespace InventoryManagement.Api.Features.Users.ListUsers;

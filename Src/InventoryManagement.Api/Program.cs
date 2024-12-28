@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Security.Claims;
-using System.Security.Principal;
+
 using FluentValidation;
+
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Email;
 using InventoryManagement.Api.Utilities;
+
 using Microsoft.AspNetCore.Identity;
 
 namespace InventoryManagement.Api;
@@ -41,28 +43,42 @@ public class Program
 
     private static void ConfigureAuthentication(IServiceCollection services)
     {
-        services.AddAuthorization();
-        services.AddAuthentication()
-            .AddCookie(IdentityConstants.ApplicationScheme, config =>
-            {
-                config.Cookie.HttpOnly = true;
-                config.Cookie.IsEssential = true;
-                config.SlidingExpiration = true;
-                config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            });
-        
         services.AddIdentityCore<User>(config =>
             {
                 config.Password.RequiredLength = 7;
                 config.Password.RequireNonAlphanumeric = false;
                 config.Password.RequireLowercase = true;
                 config.Password.RequireUppercase = true;
+
                 config.User.RequireUniqueEmail = true;
             })
             .AddRoles<IdentityRole<int>>()
             .AddSignInManager<SignInManager<User>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddAuthentication(IdentityConstants.ApplicationScheme)
+            .AddCookie(IdentityConstants.ApplicationScheme, config =>
+            {
+                config.Cookie.HttpOnly = true;
+                config.Cookie.IsEssential = true;
+                config.SlidingExpiration = true;
+                config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+
+                config.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                };
+
+                config.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                };
+            });
+
+        services.AddAuthorization();
     }
 
     private static void ConfigureClaimsPrincipalInjection(IServiceCollection services)
