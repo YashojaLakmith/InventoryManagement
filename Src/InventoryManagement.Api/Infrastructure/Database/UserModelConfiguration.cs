@@ -1,5 +1,5 @@
 ﻿using InventoryManagement.Api.Features.Users;
-using Microsoft.AspNetCore.Identity;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +12,9 @@ public class UserModelConfiguration : IEntityTypeConfiguration<User>
         builder.Property(prop => prop.Id)
             .IsRequired()
             .UseIdentityAlwaysColumn();
+
+        builder.Property(prop => prop.Email)
+            .IsRequired();
 
         builder.HasIndex(prop => prop.Email)
             .IsUnique();

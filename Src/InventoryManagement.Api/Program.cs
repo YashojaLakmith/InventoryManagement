@@ -6,6 +6,7 @@ using FluentValidation;
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Email;
+using InventoryManagement.Api.Startup;
 using InventoryManagement.Api.Utilities;
 
 using Microsoft.AspNetCore.Identity;
@@ -36,8 +37,9 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.MapSwagger();
+        app.MapSwagger().RequireAuthorization();
         app.AddApiEndpoints();
+        await app.UseDatabaseMigrationsAndSeeding();
         await app.RunAsync();
     }
 
