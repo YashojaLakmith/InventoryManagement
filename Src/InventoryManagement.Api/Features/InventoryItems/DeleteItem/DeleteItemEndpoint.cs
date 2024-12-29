@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Utilities;
 
@@ -16,18 +17,24 @@ public class DeleteItemEndpoint : IEndpoint
             [FromRoute] string itemId,
             ISender sender) =>
         {
-            Result commandResult = await sender.Send(new ItemIdToDelete(itemId));
-
-            return commandResult.IsSuccess 
-                ? Results.NoContent() 
-                : MatchErrors(commandResult);
+            return await DeleteItemAsync(itemId, sender);
         })
             .RequireAuthorization()
+            .WithName(InventoryItemEndpointNameConstants.DeleteItem)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<List<IError>>(StatusCodes.Status404NotFound)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden);
+    }
+
+    public static async Task<IResult> DeleteItemAsync(string itemId, ISender sender)
+    {
+        Result commandResult = await sender.Send(new ItemIdToDelete(itemId));
+
+        return commandResult.IsSuccess
+            ? Results.NoContent()
+            : MatchErrors(commandResult);
     }
 
     private static IResult MatchErrors(Result commandResult)

@@ -11,11 +11,17 @@ public class LogoutEndpoint : IEndpoint
     {
         routeBuilder.MapGet(@"/api/v1/auth/logout/", async (SignInManager<User> signInManager) =>
         {
-            await signInManager.SignOutAsync();
-            return Results.Ok();
+            return await SignOutAsync(signInManager);
         })
             .RequireAuthorization()
+            .WithName(AuthenticationEndpointNameConstants.LogoutEndpoint)
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
+    }
+
+    public static async Task<IResult> SignOutAsync(SignInManager<User> signInManager)
+    {
+        await signInManager.SignOutAsync();
+        return Results.Ok();
     }
 }

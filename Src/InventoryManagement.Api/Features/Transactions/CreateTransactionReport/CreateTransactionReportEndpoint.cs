@@ -13,7 +13,7 @@ public class CreateTransactionReportEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost(@"/api/v1/reports/transaction/", async (
+        routeBuilder.MapPost(@"/api/v1/reports/inventory-transaction/", async (
             [FromBody] TransactionReportFilters filters,
             ISender sender) =>
         {
@@ -21,12 +21,13 @@ public class CreateTransactionReportEndpoint : IEndpoint
 
             return Results.File(fileStream.Value, @"application/octet-stream",
                 $@"Transaction Report: {DateTime.Now:D}.xlsx");
-        });
-        // .RequireAuthorization(policy => policy.RequireRole([
-        //     Roles.ScheduleManager,
-        //     Roles.ReportGenerator,
-        //     Roles.Issuer,
-        //     Roles.Receiver,
-        //     Roles.SuperUser]));
+        })
+         .RequireAuthorization(policy => policy.RequireRole(
+             Roles.ScheduleManager,
+             Roles.ReportGenerator,
+             Roles.Issuer,
+             Roles.Receiver,
+             Roles.SuperUser))
+         .WithName(TransactionRecordEndpointNameConstants.CreateTransactionReport);
     }
 }

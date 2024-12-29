@@ -26,6 +26,7 @@ public class RemoveRoleEndpoint : IEndpoint
                 : MatchErrors(requestResult);
         })
         .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
+        .WithName(UserEndpointNameConstants.RemoveRoles)
         .Produces(StatusCodes.Status204NoContent)
         .Produces<List<IError>>(StatusCodes.Status400BadRequest)
         .Produces<List<IError>>(StatusCodes.Status404NotFound)

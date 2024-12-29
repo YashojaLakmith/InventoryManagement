@@ -28,7 +28,8 @@ public class ListUserEndpoint : IEndpoint
 
 
             })
-            //.RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.UserManager))
+            .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.UserManager))
+            .WithName(UserEndpointNameConstants.ListUsers)
             .Produces<IReadOnlyCollection<ListUserQueryResult>>(StatusCodes.Status200OK)
             .Produces<IError>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError)

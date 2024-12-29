@@ -11,6 +11,7 @@ public class CreateBatchEndpoint : IEndpoint
         {
 
         })
-            .RequireAuthorization(policy => policy.RequireRole([Roles.ScheduleManager]));
+            .RequireAuthorization(policy => policy.RequireRole([Roles.ScheduleManager]))
+            .WithBatchEndpointName(BatchEndpointNameConstants.CreateBatch);
     }
 }

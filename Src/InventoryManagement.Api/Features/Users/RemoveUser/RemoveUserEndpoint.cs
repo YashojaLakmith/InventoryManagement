@@ -28,6 +28,7 @@ public class RemoveUserEndpoint : IEndpoint
         })
         .WithName(EndnpointName)
         .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
+        .WithName(UserEndpointNameConstants.DeleteUser)
         .Produces<List<IError>>(StatusCodes.Status409Conflict)
         .Produces<List<IError>>(StatusCodes.Status400BadRequest)
         .Produces<List<IError>>(StatusCodes.Status404NotFound)

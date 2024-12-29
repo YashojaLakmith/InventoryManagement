@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Utilities;
 
@@ -16,17 +17,23 @@ public class CreateItemEndpoint : IEndpoint
             [FromBody] NewItemInformation itemInformation,
             ISender sender) =>
         {
-            Result<string> commandResult = await sender.Send(itemInformation);
-
-            return commandResult.IsSuccess 
-                ? Results.Created(@"/api/v1/items/", commandResult.Value) 
-                : MatchErrors(commandResult);
+            return await CreateNewItemAsync(itemInformation, sender);
         })
             .RequireAuthorization()
+            .WithName(InventoryItemEndpointNameConstants.CreateItem)
             .Produces<List<IResult>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden);
+    }
+
+    public static async Task<IResult> CreateNewItemAsync(NewItemInformation itemInformation, ISender sender)
+    {
+        Result<string> commandResult = await sender.Send(itemInformation);
+
+        return commandResult.IsSuccess
+            ? Results.Created(@"/api/v1/items/", commandResult.Value)
+            : MatchErrors(commandResult);
     }
 
     private static IResult MatchErrors(Result<string> commandResult)
