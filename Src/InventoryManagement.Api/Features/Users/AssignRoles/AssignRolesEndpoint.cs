@@ -19,11 +19,7 @@ public class AssignRolesEndpoint : IEndpoint
             ISender sender) =>
         {
             AssignRoleInformation request = new(userId, rolesToAssign);
-            Result requestResult = await sender.Send(request);
-
-            return requestResult.IsSuccess
-                ? Results.NoContent()
-                : MatchErrors(requestResult);
+            return await AssignRolesAsync(sender, request);
         })
             .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
             .WithName(UserEndpointNameConstants.AssignRoles)
@@ -33,6 +29,15 @@ public class AssignRolesEndpoint : IEndpoint
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status500InternalServerError);
+    }
+
+    public static async Task<IResult> AssignRolesAsync(ISender sender, AssignRoleInformation request)
+    {
+        Result requestResult = await sender.Send(request);
+
+        return requestResult.IsSuccess
+            ? Results.NoContent()
+            : MatchErrors(requestResult);
     }
 
     private static IResult MatchErrors(Result result)

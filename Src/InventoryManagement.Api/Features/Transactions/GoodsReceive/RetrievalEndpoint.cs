@@ -18,13 +18,9 @@ public class RetrievalEndpoint : IEndpoint
         routeBuilder.MapPost(@"api/v1/receive/", async (
                 [FromBody] RetrievalInformation retrievalInformation,
                 ISender sender) =>
-            {
-                Result transactionResult = await sender.Send(retrievalInformation);
-
-                return transactionResult.IsSuccess
-                    ? Results.Created()
-                    : MatchErrors(transactionResult);
-            })
+        {
+            return await ReceiveGoodsAsync(retrievalInformation, sender);
+        })
             .RequireAuthorization(policy => policy.RequireRole(Roles.Receiver, Roles.ScheduleManager))
             .WithName(TransactionRecordEndpointNameConstants.ReceiveGoods)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
@@ -33,6 +29,15 @@ public class RetrievalEndpoint : IEndpoint
             .Produces(StatusCodes.Status503ServiceUnavailable)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden); ;
+    }
+
+    public static async Task<IResult> ReceiveGoodsAsync(RetrievalInformation retrievalInformation, ISender sender)
+    {
+        Result transactionResult = await sender.Send(retrievalInformation);
+
+        return transactionResult.IsSuccess
+            ? Results.Created()
+            : MatchErrors(transactionResult);
     }
 
     private static IResult MatchErrors(Result transactionResult)

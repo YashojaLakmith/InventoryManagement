@@ -17,10 +17,7 @@ public class CreateTransactionReportEndpoint : IEndpoint
             [FromBody] TransactionReportFilters filters,
             ISender sender) =>
         {
-            Result<Stream> fileStream = await sender.Send(filters);
-
-            return Results.File(fileStream.Value, @"application/octet-stream",
-                $@"Transaction Report: {DateTime.Now:D}.xlsx");
+            return await GenerateReportAsync(filters, sender);
         })
          .RequireAuthorization(policy => policy.RequireRole(
              Roles.ScheduleManager,
@@ -29,5 +26,28 @@ public class CreateTransactionReportEndpoint : IEndpoint
              Roles.Receiver,
              Roles.SuperUser))
          .WithName(TransactionRecordEndpointNameConstants.CreateTransactionReport);
+    }
+
+    public static async Task<IResult> GenerateReportAsync(TransactionReportFilters filters, ISender sender)
+    {
+        Result<Stream> fileStreamResult = await sender.Send(filters);
+
+        return fileStreamResult.IsSuccess
+            ? CreateFileResult(fileStreamResult.Value)
+            : MatchErrors(fileStreamResult);
+    }
+
+    private static IResult CreateFileResult(Stream fileStream)
+    {
+        fileStream.Position = 0;
+        return Results.File(
+            fileStream,
+            @"application/octet-stream",
+            $@"Inventory Transaction Report: {DateTime.Now:D}.xlsx");
+    }
+
+    private static IResult MatchErrors(Result<Stream> reportGenerationResult)
+    {
+        throw new NotImplementedException();
     }
 }

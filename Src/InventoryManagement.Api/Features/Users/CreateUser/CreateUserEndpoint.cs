@@ -17,11 +17,7 @@ public class CreateUserEndpoint : IEndpoint
             [FromBody] NewUserInformation newUserInformation,
             ISender sender) =>
         {
-            Result<int> result = await sender.Send(newUserInformation);
-
-            return result.IsSuccess
-                ? Results.CreatedAtRoute(@"/api/v1/users/", result.Value)
-                : MatchErrors(result);
+            return await CreateUserAsync(newUserInformation, sender);
         })
             .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.UserManager))
             .WithName(UserEndpointNameConstants.CreateUser)
@@ -30,6 +26,15 @@ public class CreateUserEndpoint : IEndpoint
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status500InternalServerError)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest);
+    }
+
+    public static async Task<IResult> CreateUserAsync(NewUserInformation newUserInformation, ISender sender)
+    {
+        Result<int> result = await sender.Send(newUserInformation);
+
+        return result.IsSuccess
+            ? Results.CreatedAtRoute(@"/api/v1/users/", result.Value)
+            : MatchErrors(result);
     }
 
     private static IResult MatchErrors(Result<int> result)

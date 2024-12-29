@@ -20,11 +20,7 @@ public class RemoveUserEndpoint : IEndpoint
             ISender sender) =>
         {
             RemoveUserInformation request = new(userId);
-            Result requestResult = await sender.Send(request);
-
-            return requestResult.IsSuccess
-                ? Results.NoContent()
-                : MatchErrors(requestResult);
+            return await RemoveUserAsync(sender, request);
         })
         .WithName(EndnpointName)
         .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
@@ -35,6 +31,15 @@ public class RemoveUserEndpoint : IEndpoint
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden)
         .Produces(StatusCodes.Status500InternalServerError);
+    }
+
+    public static async Task<IResult> RemoveUserAsync(ISender sender, RemoveUserInformation request)
+    {
+        Result requestResult = await sender.Send(request);
+
+        return requestResult.IsSuccess
+            ? Results.NoContent()
+            : MatchErrors(requestResult);
     }
 
     private static IResult MatchErrors(Result requestResult)
