@@ -24,6 +24,7 @@ public class ModifyPasswordEndpoint : IEndpoint
                 : MatchErrors(modificationResult);
         })
         .RequireAuthorization()
+        .WithName(UserEndpointNameConstants.ModifyPassword)
         .Produces(StatusCodes.Status204NoContent)
         .Produces<List<IError>>(StatusCodes.Status400BadRequest)
         .Produces<List<IError>>(StatusCodes.Status404NotFound)

@@ -1,17 +1,12 @@
 ﻿namespace InventoryManagement.Api.Features.Users;
 
-public static class BatchEndpointNameConstants
+public static class UserEndpointNameConstants
 {
-    private const string GroupName = @"Users";
-    public const string LoginEndpoint = @"Login";
-    public const string LogoutEndpoint = @"Logout";
-    public const string RequestResetPassword = @"Request Password Reset";
-    public const string ResetPassword = @"Reset Password";
-
-    public static RouteHandlerBuilder WithUserEndpointName(this RouteHandlerBuilder builder, string endpointName)
-    {
-        return builder
-            .WithGroupName(GroupName)
-            .WithName(endpointName);
-    }
+    public const string AssignRoles = @"Assign User Roles";
+    public const string CreateUser = @"Create User";
+    public const string ListUsers = @"List Users";
+    public const string ModifyPassword = @"Change User Password";
+    public const string RemoveRoles = @"Remove User Roles";
+    public const string DeleteUser = @"Delete User";
+    public const string ViewUser = @"View User Information";
 }

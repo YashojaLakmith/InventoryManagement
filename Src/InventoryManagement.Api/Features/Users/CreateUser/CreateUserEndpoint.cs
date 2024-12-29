@@ -19,11 +19,12 @@ public class CreateUserEndpoint : IEndpoint
         {
             Result<int> result = await sender.Send(newUserInformation);
 
-            return result.IsSuccess 
-                ? Results.CreatedAtRoute(@"/api/v1/users/", result.Value) 
+            return result.IsSuccess
+                ? Results.CreatedAtRoute(@"/api/v1/users/", result.Value)
                 : MatchErrors(result);
         })
             .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.UserManager))
+            .WithName(UserEndpointNameConstants.CreateUser)
             .Produces(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
