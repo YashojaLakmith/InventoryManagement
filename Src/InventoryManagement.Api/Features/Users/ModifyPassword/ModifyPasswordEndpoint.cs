@@ -13,9 +13,11 @@ public class ModifyPasswordEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPatch(@"/api/v1/users/modify-password", async (
-            [FromBody] ModifyPasswordInformation passwordInformation,
-            ISender sender) =>
+        routeBuilder.MapPatch(
+            @"/api/v1/users/modify-password",
+            async (
+                [FromBody] ModifyPasswordInformation passwordInformation,
+                ISender sender) =>
         {
             return await ModifyPasswordAsync(passwordInformation, sender);
         })

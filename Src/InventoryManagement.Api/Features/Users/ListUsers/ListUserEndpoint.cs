@@ -13,7 +13,9 @@ public class ListUserEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapGet(@"/api/v1/users", async (
+        routeBuilder.MapGet(
+            @"/api/v1/users",
+            async (
                 [FromQuery] int pageNumber,
                 [FromQuery] int resultsPerPage,
                 [FromQuery(Name = @"role")] string[]? rolesToFilter,

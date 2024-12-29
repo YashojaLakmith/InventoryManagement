@@ -13,9 +13,11 @@ public class ViewUserEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapGet(@"/api/v1/users/{userId:int}", async (
-            [FromRoute] int userId,
-            ISender sender) =>
+        routeBuilder.MapGet(
+            @"/api/v1/users/{userId:int}",
+            async (
+                [FromRoute] int userId,
+                ISender sender) =>
         {
             UserIdQuery query = new(userId);
             return await ViewUserAsync(sender, query);

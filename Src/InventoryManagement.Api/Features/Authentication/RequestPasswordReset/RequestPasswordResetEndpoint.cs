@@ -13,10 +13,13 @@ public class RequestPasswordResetEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost(@"api/v1/auth/request-password-reset/", async (
-                [FromBody] RequestPasswordResetQuery query,
+        routeBuilder.MapPost(
+            @"/api/v1/auth/request-password-reset/",
+            async (
+                [FromBody] string emailAddress,
                 ISender sender) =>
         {
+            RequestPasswordResetQuery query = new(emailAddress);
             return await RequestForPasswordResetAsync(query, sender);
         })
             .AllowAnonymous()
@@ -27,7 +30,7 @@ public class RequestPasswordResetEndpoint : IEndpoint
             .Produces<List<IError>>(StatusCodes.Status404NotFound);
     }
 
-    public static async Task<IResult> RequestForPasswordResetAsync(RequestPasswordResetQuery query, ISender sender)
+    private static async Task<IResult> RequestForPasswordResetAsync(RequestPasswordResetQuery query, ISender sender)
     {
         Result queryResult = await sender.Send(query);
 
