@@ -13,10 +13,12 @@ public class RemoveRoleEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPatch(@"/api/v1/users/{userId:int}/remove-roles", async (
-            [FromRoute] int userId,
-            [FromQuery(Name = @"role")] string[] rolesToRemove,
-            ISender sender) =>
+        routeBuilder.MapPatch(
+            @"/api/v1/users/{userId:int}/remove-roles",
+            async (
+                [FromRoute] int userId,
+                [FromQuery(Name = @"role")] string[] rolesToRemove,
+                ISender sender) =>
         {
             RemoveRoleInformation request = new(userId, rolesToRemove);
             return await RemoveRolesAsync(sender, request);

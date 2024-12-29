@@ -13,10 +13,12 @@ public class AssignRolesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPatch(@"api/v1/users/{userId:int}/assign-roles", async (
-            [FromRoute] int userId,
-            [FromQuery(Name = @"rolename")] string[] rolesToAssign,
-            ISender sender) =>
+        routeBuilder.MapPatch(
+            @"api/v1/users/{userId:int}/assign-roles",
+            async (
+                [FromRoute] int userId,
+                [FromQuery(Name = @"rolename")] string[] rolesToAssign,
+                ISender sender) =>
         {
             AssignRoleInformation request = new(userId, rolesToAssign);
             return await AssignRolesAsync(sender, request);

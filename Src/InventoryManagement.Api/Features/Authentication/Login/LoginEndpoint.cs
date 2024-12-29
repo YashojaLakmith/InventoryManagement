@@ -14,9 +14,11 @@ public class LoginEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost(@"/api/v1/auth/login", async (
-            [FromBody] LoginInformation loginInfo,
-            ISender sender) =>
+        routeBuilder.MapPost(
+            @"/api/v1/auth/login",
+            async (
+                [FromBody] LoginInformation loginInfo,
+                ISender sender) =>
         {
             return await LoginAsync(loginInfo, sender);
         })
@@ -28,7 +30,7 @@ public class LoginEndpoint : IEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
     }
 
-    public static async Task<IResult> LoginAsync(LoginInformation loginInfo, ISender sender)
+    private static async Task<IResult> LoginAsync(LoginInformation loginInfo, ISender sender)
     {
         Result loginResult = await sender.Send(loginInfo);
 

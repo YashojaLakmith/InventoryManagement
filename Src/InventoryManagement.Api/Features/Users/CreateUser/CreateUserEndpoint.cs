@@ -13,9 +13,11 @@ public class CreateUserEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost(@"/api/v1/users/", async (
-            [FromBody] NewUserInformation newUserInformation,
-            ISender sender) =>
+        routeBuilder.MapPost(
+            @"/api/v1/users/",
+            async (
+                [FromBody] NewUserInformation newUserInformation,
+                ISender sender) =>
         {
             return await CreateUserAsync(newUserInformation, sender);
         })

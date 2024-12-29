@@ -11,18 +11,17 @@ namespace InventoryManagement.Api.Features.Users.RemoveUser;
 
 public class RemoveUserEndpoint : IEndpoint
 {
-    public const string EndnpointName = @"Remove User";
-
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapDelete(@"/api/v1/users/{userId:int}", async (
-            [FromRoute] int userId,
-            ISender sender) =>
+        routeBuilder.MapDelete(
+            @"/api/v1/users/{userId:int}",
+            async (
+                [FromRoute] int userId,
+                ISender sender) =>
         {
             RemoveUserInformation request = new(userId);
             return await RemoveUserAsync(sender, request);
         })
-        .WithName(EndnpointName)
         .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
         .WithName(UserEndpointNameConstants.DeleteUser)
         .Produces<List<IError>>(StatusCodes.Status409Conflict)

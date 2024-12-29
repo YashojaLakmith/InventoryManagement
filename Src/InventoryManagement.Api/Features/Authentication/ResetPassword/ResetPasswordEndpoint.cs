@@ -13,7 +13,9 @@ public class ResetPasswordEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPatch(@"/api/v1/auth/reset-password", async (
+        routeBuilder.MapPatch(
+            @"/api/v1/auth/reset-password",
+            async (
                 [FromBody] PasswordResetTokenData resetData,
                 ISender sender) =>
         {
@@ -27,7 +29,7 @@ public class ResetPasswordEndpoint : IEndpoint
             .Produces<List<IError>>(StatusCodes.Status404NotFound);
     }
 
-    public static async Task<IResult> ResetPasswordAsync(PasswordResetTokenData resetData, ISender sender)
+    private static async Task<IResult> ResetPasswordAsync(PasswordResetTokenData resetData, ISender sender)
     {
         Result resetResult = await sender.Send(resetData);
 
