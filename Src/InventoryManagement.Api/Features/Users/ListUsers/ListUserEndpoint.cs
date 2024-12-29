@@ -18,16 +18,10 @@ public class ListUserEndpoint : IEndpoint
                 [FromQuery] int resultsPerPage,
                 [FromQuery(Name = @"role")] string[]? rolesToFilter,
                 ISender sender) =>
-            {
-                ListUserQuery query = new(resultsPerPage, pageNumber, rolesToFilter ?? []);
-                Result<ListUserQueryResult> queryResult = await sender.Send(query);
-
-                return queryResult.IsSuccess
-                    ? Results.Ok(queryResult.Value)
-                    : MatchErrors(queryResult);
-
-
-            })
+        {
+            ListUserQuery query = new(resultsPerPage, pageNumber, rolesToFilter ?? []);
+            return await ListUsersAsync(sender, query);
+        })
             .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.UserManager))
             .WithName(UserEndpointNameConstants.ListUsers)
             .Produces<IReadOnlyCollection<ListUserQueryResult>>(StatusCodes.Status200OK)
@@ -35,6 +29,15 @@ public class ListUserEndpoint : IEndpoint
             .Produces(StatusCodes.Status500InternalServerError)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden);
+    }
+
+    public static async Task<IResult> ListUsersAsync(ISender sender, ListUserQuery query)
+    {
+        Result<ListUserQueryResult> queryResult = await sender.Send(query);
+
+        return queryResult.IsSuccess
+            ? Results.Ok(queryResult.Value)
+            : MatchErrors(queryResult);
     }
 
     private static IResult MatchErrors(Result<ListUserQueryResult> queryResult)

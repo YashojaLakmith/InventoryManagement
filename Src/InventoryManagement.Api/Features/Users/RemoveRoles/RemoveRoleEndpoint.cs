@@ -19,11 +19,7 @@ public class RemoveRoleEndpoint : IEndpoint
             ISender sender) =>
         {
             RemoveRoleInformation request = new(userId, rolesToRemove);
-            Result requestResult = await sender.Send(request);
-
-            return requestResult.IsSuccess
-                ? Results.NoContent()
-                : MatchErrors(requestResult);
+            return await RemoveRolesAsync(sender, request);
         })
         .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
         .WithName(UserEndpointNameConstants.RemoveRoles)
@@ -33,6 +29,15 @@ public class RemoveRoleEndpoint : IEndpoint
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden)
         .Produces(StatusCodes.Status500InternalServerError);
+    }
+
+    public static async Task<IResult> RemoveRolesAsync(ISender sender, RemoveRoleInformation request)
+    {
+        Result requestResult = await sender.Send(request);
+
+        return requestResult.IsSuccess
+            ? Results.NoContent()
+            : MatchErrors(requestResult);
     }
 
     private static IResult MatchErrors(Result result)

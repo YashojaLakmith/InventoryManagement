@@ -18,13 +18,9 @@ public class IssuanceEndpoint : IEndpoint
         routeBuilder.MapPost(@"/api/v1/issue/", async (
                 [FromBody] IssuanceInformation issuanceInfo,
                 ISender sender) =>
-            {
-                Result transactionResult = await sender.Send(issuanceInfo);
-
-                return transactionResult.IsSuccess
-                    ? Results.Created()
-                    : MatchErrors(transactionResult);
-            })
+        {
+            return await IssueGoodsAsync(issuanceInfo, sender);
+        })
             .RequireAuthorization(policy => policy.RequireRole(Roles.Issuer, Roles.ScheduleManager))
             .WithName(TransactionRecordEndpointNameConstants.IssueGoods)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
@@ -33,6 +29,15 @@ public class IssuanceEndpoint : IEndpoint
             .Produces(StatusCodes.Status503ServiceUnavailable)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden);
+    }
+
+    public static async Task<IResult> IssueGoodsAsync(IssuanceInformation issuanceInfo, ISender sender)
+    {
+        Result transactionResult = await sender.Send(issuanceInfo);
+
+        return transactionResult.IsSuccess
+            ? Results.Created()
+            : MatchErrors(transactionResult);
     }
 
     private static IResult MatchErrors(Result transactionResult)

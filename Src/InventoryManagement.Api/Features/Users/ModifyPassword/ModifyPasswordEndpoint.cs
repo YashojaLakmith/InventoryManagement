@@ -17,11 +17,7 @@ public class ModifyPasswordEndpoint : IEndpoint
             [FromBody] ModifyPasswordInformation passwordInformation,
             ISender sender) =>
         {
-            Result modificationResult = await sender.Send(passwordInformation);
-
-            return modificationResult.IsSuccess
-                ? Results.NoContent()
-                : MatchErrors(modificationResult);
+            return await ModifyPasswordAsync(passwordInformation, sender);
         })
         .RequireAuthorization()
         .WithName(UserEndpointNameConstants.ModifyPassword)
@@ -30,6 +26,15 @@ public class ModifyPasswordEndpoint : IEndpoint
         .Produces<List<IError>>(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status500InternalServerError);
+    }
+
+    public static async Task<IResult> ModifyPasswordAsync(ModifyPasswordInformation passwordInformation, ISender sender)
+    {
+        Result modificationResult = await sender.Send(passwordInformation);
+
+        return modificationResult.IsSuccess
+            ? Results.NoContent()
+            : MatchErrors(modificationResult);
     }
 
     private static IResult MatchErrors(Result result)

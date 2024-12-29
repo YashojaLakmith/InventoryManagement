@@ -18,11 +18,7 @@ public class ViewUserEndpoint : IEndpoint
             ISender sender) =>
         {
             UserIdQuery query = new(userId);
-            Result<UserView> queryResult = await sender.Send(query);
-
-            return queryResult.IsSuccess
-                ? Results.Ok(queryResult.Value)
-                : MatchErrors(queryResult);
+            return await ViewUserAsync(sender, query);
         })
         .RequireAuthorization(o => o.RequireRole(Roles.UserManager, Roles.SuperUser))
         .WithName(UserEndpointNameConstants.ViewUser)
@@ -32,6 +28,15 @@ public class ViewUserEndpoint : IEndpoint
         .Produces(StatusCodes.Status401Unauthorized)
         .Produces(StatusCodes.Status403Forbidden)
         .Produces(StatusCodes.Status500InternalServerError);
+    }
+
+    private static async Task<IResult> ViewUserAsync(ISender sender, UserIdQuery query)
+    {
+        Result<UserView> queryResult = await sender.Send(query);
+
+        return queryResult.IsSuccess
+            ? Results.Ok(queryResult.Value)
+            : MatchErrors(queryResult);
     }
 
     private static IResult MatchErrors(Result<UserView> queryResult)
