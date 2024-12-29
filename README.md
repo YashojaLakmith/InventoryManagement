@@ -7,4 +7,4 @@ Inventory Management is a REST API of a conceptual inventory management system b
 - Authentication: Including Login, Logout and Password Reset.
 - Transactions: Goods receive and issuance functionalities.
 - Inventory Items: Create and delete inventory items.
-- Batch Management: Create and delete batches.
+- User Management: Including user role management functionalities
