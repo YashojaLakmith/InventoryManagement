@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Transactions.TransactionErrors;
 using InventoryManagement.Api.Features.Users;
@@ -24,7 +25,8 @@ public class IssuanceEndpoint : IEndpoint
                     ? Results.Created()
                     : MatchErrors(transactionResult);
             })
-            .RequireAuthorization(policy => policy.RequireRole([Roles.Issuer, Roles.ScheduleManager]))
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Issuer, Roles.ScheduleManager))
+            .WithName(TransactionRecordEndpointNameConstants.IssueGoods)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
             .Produces<List<IError>>(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError)

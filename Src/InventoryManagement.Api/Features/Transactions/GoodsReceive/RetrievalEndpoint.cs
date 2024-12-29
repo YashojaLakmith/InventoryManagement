@@ -1,9 +1,12 @@
 ﻿using FluentResults;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Transactions.TransactionErrors;
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Utilities;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement.Api.Features.Transactions.GoodsReceive;
@@ -22,15 +25,16 @@ public class RetrievalEndpoint : IEndpoint
                     ? Results.Created()
                     : MatchErrors(transactionResult);
             })
-            .RequireAuthorization(policy => policy.RequireRole([Roles.Receiver, Roles.ScheduleManager]))
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Receiver, Roles.ScheduleManager))
+            .WithName(TransactionRecordEndpointNameConstants.ReceiveGoods)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
             .Produces<List<IError>>(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError)
             .Produces(StatusCodes.Status503ServiceUnavailable)
             .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden);;
+            .Produces(StatusCodes.Status403Forbidden); ;
     }
-    
+
     private static IResult MatchErrors(Result transactionResult)
     {
         if (transactionResult.HasError<InvalidDataError>())
