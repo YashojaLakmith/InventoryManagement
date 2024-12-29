@@ -1,10 +1,13 @@
 ﻿using FluentResults;
+
 using FluentValidation;
 using FluentValidation.Results;
+
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Infrastructure.Database;
+
 using MediatR;
-using Microsoft.AspNetCore.Identity;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.ViewUser;
@@ -16,8 +19,8 @@ public class ViewUserQueryHandler : IRequestHandler<UserIdQuery, Result<UserView
     private readonly ILogger<ViewUserQueryHandler> _logger;
 
     public ViewUserQueryHandler(
-        ApplicationDbContext dbContext, 
-        IValidator<UserIdQuery> validator, 
+        ApplicationDbContext dbContext,
+        IValidator<UserIdQuery> validator,
         ILogger<ViewUserQueryHandler> logger)
     {
         _dbContext = dbContext;
@@ -32,24 +35,20 @@ public class ViewUserQueryHandler : IRequestHandler<UserIdQuery, Result<UserView
         {
             return InvalidDataError.CreateFailureResultFromError<UserView>(validationResult.Errors);
         }
-        
-        Tuple<int, string, string>? userDetails = await GetUserDetailsAsync(request, cancellationToken);
+
+        var userDetails = await _dbContext.Users
+            .AsNoTracking()
+            .Select(user => new { user.Id, user.UserName, user.Email })
+            .SingleOrDefaultAsync(user => user.Id == request.UserId, cancellationToken);
+
         if (userDetails is null)
         {
             return NotFoundError.CreateFailureResultFromError<UserView>($"User with Id: {request.UserId}");
         }
-        
+
         List<string> roles = await GetUserRolesAsync(request, cancellationToken);
 
-        return new UserView(userDetails.Item1, userDetails.Item2, userDetails.Item3, roles);
-    }
-
-    private Task<Tuple<int, string, string>?> GetUserDetailsAsync(UserIdQuery request, CancellationToken cancellationToken)
-    {
-        return _dbContext.Users
-            .AsNoTracking()
-            .Select(user => Tuple.Create(user.Id, user.UserName!, user.Email!))
-            .SingleOrDefaultAsync(user => user.Item1 == request.UserId, cancellationToken);
+        return new UserView(userDetails.Id, userDetails.UserName!, userDetails.Email!, roles);
     }
 
     private Task<List<string>> GetUserRolesAsync(UserIdQuery request, CancellationToken cancellationToken)
