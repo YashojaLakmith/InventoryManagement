@@ -3,7 +3,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace InventoryManagement.Api.Infrastructure.Database;
+namespace InventoryManagement.Api.Infrastructure.Database.ModelConfigurations;
 
 public class TransactionRecordModelConfiguration : IEntityTypeConfiguration<TransactionRecord>
 {
