@@ -4,27 +4,24 @@ using FluentValidation;
 using FluentValidation.Results;
 
 using InventoryManagement.Api.Errors;
-using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.ListUsers;
 
 public class ListUserRequestHandler : IRequestHandler<ListUserQuery, Result<ListUserQueryResult>>
 {
     private readonly IValidator<ListUserQuery> _validator;
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<ListUserRequestHandler> _logger;
 
     public ListUserRequestHandler(
         IValidator<ListUserQuery> validator,
-        ApplicationDbContext dbContext,
+        IUserRepository userRepository,
         ILogger<ListUserRequestHandler> logger)
     {
         _validator = validator;
-        _dbContext = dbContext;
+        _userRepository = userRepository;
         _logger = logger;
     }
 
@@ -36,33 +33,7 @@ public class ListUserRequestHandler : IRequestHandler<ListUserQuery, Result<List
             return InvalidDataError.CreateFailureResultFromError<ListUserQueryResult>(validationResult.Errors);
         }
 
-        List<UserListItem> users = await GetMatchingUsersAsync(request, cancellationToken);
+        List<UserListItem> users = await _userRepository.ListUsersByFilterAsync(request, cancellationToken);
         return new ListUserQueryResult(users, request.PageNumber, users.Count);
-    }
-
-    private Task<List<UserListItem>> GetMatchingUsersAsync(ListUserQuery request, CancellationToken cancellationToken)
-    {
-        int limit = request.PageSize;
-        int offset = (request.PageNumber - 1) * request.PageSize;
-
-        return _dbContext.Database
-            .SqlQuery<UserListItem>(GetQueryString(request.Roles, limit, offset))
-            .ToListAsync(cancellationToken);
-    }
-
-    private static FormattableString GetQueryString(IReadOnlyCollection<string> roles, int limit, int offset)
-    {
-        string roleList = string.Join(',', roles.Select(r => $@"{r.ToUpper()}"));
-
-        return $"""
-                SELECT u."Id" AS "UserId", u."UserName" AS "UserName", u."Email" AS "EmailAddress"
-                FROM "AspNetUsers" AS u
-                INNER JOIN "AspNetUserRoles" AS ur ON u."Id" = ur."UserId"
-                INNER JOIN "AspNetRoles" AS r ON ur."RoleId" = r."Id"
-                WHERE r."Name" IN ({roleList})
-                ORDER BY u."Id"
-                LIMIT {limit}
-                OFFSET {offset}
-                """;
     }
 }
