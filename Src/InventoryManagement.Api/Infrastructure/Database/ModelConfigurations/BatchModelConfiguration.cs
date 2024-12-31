@@ -3,7 +3,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace InventoryManagement.Api.Infrastructure.Database;
+namespace InventoryManagement.Api.Infrastructure.Database.ModelConfigurations;
 
 public class BatchModelConfiguration : IEntityTypeConfiguration<Batch>
 {
@@ -35,7 +35,7 @@ public class BatchModelConfiguration : IEntityTypeConfiguration<Batch>
         builder.Property(prop => prop.IssuedUnits)
             .IsRequired()
             .HasPrecision(10, 0);
-        
+
         builder.Property(prop => prop.ReceivedUnits)
             .IsRequired()
             .HasPrecision(10, 0);
