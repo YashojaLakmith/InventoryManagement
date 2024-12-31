@@ -26,6 +26,8 @@ public class CreateBatchEndpoint : IEndpoint
             .WithBatchEndpointName(BatchEndpointNameConstants.CreateBatch)
             .Produces(StatusCodes.Status201Created)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status500InternalServerError);
     }
 
