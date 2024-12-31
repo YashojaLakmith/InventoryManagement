@@ -5,26 +5,26 @@ using FluentValidation.Results;
 
 using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.InventoryItems;
-using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Result>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IBatchRepository _batchRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<NewBatchInformation> _validator;
     private readonly ILogger<CreateBatchCommandHandler> _logger;
 
     public CreateBatchCommandHandler(
-        ApplicationDbContext dbContext,
+        IBatchRepository batchRepository,
+        IUnitOfWork unitOfWork,
         IValidator<NewBatchInformation> validator,
         ILogger<CreateBatchCommandHandler> logger)
     {
-        _dbContext = dbContext;
+        _batchRepository = batchRepository;
+        _unitOfWork = unitOfWork;
         _validator = validator;
         _logger = logger;
     }
@@ -39,7 +39,7 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
             return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
-        bool isBatchNumberExist = await _dbContext.Batches.AnyAsync(batch => batch.BatchNumber == request.BatchNumber, cancellationToken);
+        bool isBatchNumberExist = await _batchRepository.DoesBatchExistAsync(request.BatchNumber, cancellationToken);
         if (isBatchNumberExist)
         {
             return AlreadyExistsError.CreateFailureResultFromError($@"Batch with Id: {request.BatchNumber}");
@@ -49,13 +49,11 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
 
         foreach (ItemOrder order in request.ItemOrders)
         {
-            InventoryItem? existingItem = await _dbContext.InventoryItems
-                .AsNoTracking()
-                .FirstOrDefaultAsync(item => item.InventoryItemId == order.ItemId, cancellationToken);
+            InventoryItem? existingItem = await _batchRepository.GetInventoryItemByIdAsync(order.ItemId, cancellationToken);
 
             if (existingItem is null)
             {
-                _dbContext.ChangeTracker.Clear();
+                _unitOfWork.ClearChanges();
                 return NotFoundError.CreateFailureResultFromError($@"Inventory item with Id: {order.ItemId}");
             }
 
@@ -63,8 +61,8 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
             batches.Add(newBatch);
         }
 
-        _dbContext.Batches.AddRange(batches);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _batchRepository.AddBatchLines(batches);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }
