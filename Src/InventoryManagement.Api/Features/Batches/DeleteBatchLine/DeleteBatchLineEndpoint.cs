@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Utilities;
 
@@ -13,7 +14,8 @@ public class DeleteBatchLineEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapDelete(@"/api/v1/batch/", async (
+        routeBuilder.MapDelete(
+            @"/api/v1/batch/", async (
             [FromQuery] string batchNumber,
             [FromQuery] string itemNumber,
             ISender sender) =>
@@ -21,11 +23,17 @@ public class DeleteBatchLineEndpoint : IEndpoint
             DeleteBatchLineCommand command = new(batchNumber, itemNumber);
             return await DeleteBatchLineAsync(sender, command);
         })
-            .RequireAuthorization(o => o.RequireRole(Roles.ScheduleManager))
-            .WithBatchEndpointName(BatchEndpointNameConstants.DeleteBatchLine);
+            .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.ScheduleManager))
+            .WithBatchEndpointName(BatchEndpointNameConstants.DeleteBatchLine)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<List<IError>>(StatusCodes.Status400BadRequest)
+            .Produces<List<IError>>(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces(StatusCodes.Status500InternalServerError);
     }
 
-    public static async Task<IResult> DeleteBatchLineAsync(ISender sender, DeleteBatchLineCommand command)
+    private static async Task<IResult> DeleteBatchLineAsync(ISender sender, DeleteBatchLineCommand command)
     {
         Result deleteResult = await sender.Send(command);
 
@@ -36,6 +44,19 @@ public class DeleteBatchLineEndpoint : IEndpoint
 
     private static IResult MatchErrors(Result deleteResult)
     {
-        throw new NotImplementedException();
+        if (deleteResult.HasError<InvalidDataError>())
+        {
+            return Results.BadRequest(deleteResult.Errors);
+        }
+        if (deleteResult.HasError<ActionNotAllowedError>())
+        {
+            return Results.BadRequest(deleteResult.Errors);
+        }
+        if (deleteResult.HasError<NotFoundError>())
+        {
+            return Results.BadRequest(deleteResult.Errors);
+        }
+
+        return Results.InternalServerError();
     }
 }

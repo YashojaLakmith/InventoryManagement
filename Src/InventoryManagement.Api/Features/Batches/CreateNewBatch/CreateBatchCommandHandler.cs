@@ -36,15 +36,13 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errorMessages = validationResult.Errors.Select(error => error.ErrorMessage);
-            InvalidDataError invalidDataError = new(errorMessages);
-            return Result.Fail(invalidDataError);
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
         bool isBatchNumberExist = await _dbContext.Batches.AnyAsync(batch => batch.BatchNumber == request.BatchNumber, cancellationToken);
         if (isBatchNumberExist)
         {
-            AlreadyExistsError alreadyExistsError = new(@"");
+            return AlreadyExistsError.CreateFailureResultFromError($@"Batch with Id: {request.BatchNumber}");
         }
 
         List<Batch> batches = [];
@@ -57,7 +55,8 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
 
             if (existingItem is null)
             {
-                throw new NotImplementedException();
+                _dbContext.ChangeTracker.Clear();
+                return NotFoundError.CreateFailureResultFromError($@"Inventory item with Id: {order.ItemId}");
             }
 
             Batch newBatch = Batch.Create(request.BatchNumber, existingItem, order.BatchSize, order.CostPerUnit);

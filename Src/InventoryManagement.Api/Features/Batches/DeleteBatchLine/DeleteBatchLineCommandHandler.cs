@@ -3,6 +3,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
@@ -34,7 +35,7 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            throw new NotImplementedException();
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
         Batch? existingBatch = await _dbContext.Batches
@@ -45,7 +46,7 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
 
         if (existingBatch is null)
         {
-            throw new NotImplementedException();
+            return NotFoundError.CreateFailureResultFromError($@"Batch line with item Id: {request.ItemNumber} and batch number: {request.BatchNumber}");
         }
 
         bool hasAnyTransactions = await _dbContext.TransactionRecords
@@ -60,7 +61,7 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
 
         if (hasAnyTransactions)
         {
-            throw new NotImplementedException();
+            return ActionNotAllowedError.CreateFailureResultFromError(@"This batch line cannot be deleted. It has already involved in transactions.");
         }
 
         _dbContext.Batches.Remove(existingBatch);
