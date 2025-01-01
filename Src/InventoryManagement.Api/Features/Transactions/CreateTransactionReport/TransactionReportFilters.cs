@@ -4,4 +4,7 @@ using MediatR;
 
 namespace InventoryManagement.Api.Features.Transactions.CreateTransactionReport;
 
-public class TransactionReportFilters() : IRequest<Result<Stream>>;
+public record TransactionReportFilters(
+    DateTime SinceDate,
+    DateTime ToDate,
+    string[] TransactionTypes) : IRequest<Result<TransactionReportStream>>;
