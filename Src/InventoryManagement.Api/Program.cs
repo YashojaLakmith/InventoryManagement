@@ -7,6 +7,7 @@ using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Database.Repositories;
 using InventoryManagement.Api.Infrastructure.Email;
+using InventoryManagement.Api.Infrastructure.Reports;
 using InventoryManagement.Api.Startup;
 using InventoryManagement.Api.Utilities;
 
@@ -27,6 +28,7 @@ public class Program
         ConfigureClaimsPrincipalInjection(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
         builder.Services.AddRepositoryImplementations();
+        builder.Services.AddReportGenerators();
         builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
         builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
         builder.Services.AddSingleton<IEmailSender<User>, EmailSender>();
