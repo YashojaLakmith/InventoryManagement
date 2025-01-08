@@ -28,7 +28,7 @@ public class InventoryItemRepository : IInventoryItemRepository
             .FirstOrDefaultAsync(item => item.InventoryItemId == inventoryItemId, cancellationToken);
     }
 
-    public Task<bool> IsInventoryItemIdInUserAsync(string inventoryItemId, CancellationToken cancellationToken = default)
+    public Task<bool> IsInventoryItemIdInUseAsync(string inventoryItemId, CancellationToken cancellationToken = default)
     {
         return _dbContext.InventoryItems
             .AsNoTracking()
