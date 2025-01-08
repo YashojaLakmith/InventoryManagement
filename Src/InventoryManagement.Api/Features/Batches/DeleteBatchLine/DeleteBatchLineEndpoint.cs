@@ -24,7 +24,7 @@ public class DeleteBatchLineEndpoint : IEndpoint
             return await DeleteBatchLineAsync(sender, command);
         })
             .RequireAuthorization(o => o.RequireRole(Roles.SuperUser, Roles.ScheduleManager))
-            .WithBatchEndpointName(BatchEndpointNameConstants.DeleteBatchLine)
+            .WithName(BatchEndpointNameConstants.DeleteBatchLine)
             .Produces(StatusCodes.Status204NoContent)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
             .Produces<List<IError>>(StatusCodes.Status404NotFound)

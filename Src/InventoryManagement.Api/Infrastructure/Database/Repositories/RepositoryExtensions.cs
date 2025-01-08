@@ -10,7 +10,7 @@ public static class RepositoryExtensions
 {
     public static void AddRepositoryImplementations(this IServiceCollection services)
     {
-        services.AddScoped<IUnitOfWork, ApplicationDbContext>();
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IUserRepository, UserRepository>();

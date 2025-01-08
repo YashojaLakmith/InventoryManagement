@@ -108,11 +108,9 @@ namespace InventoryManagement.Api.Migrations
 
                     b.HasKey("RecordId");
 
-                    b.HasIndex("InventoryItemId")
-                        .IsUnique();
+                    b.HasIndex("InventoryItemId");
 
-                    b.HasIndex("BatchOfItemBatchNumber", "BatchOfItemInventoryItemId")
-                        .IsUnique();
+                    b.HasIndex("BatchOfItemBatchNumber", "BatchOfItemInventoryItemId");
 
                     b.ToTable("TransactionRecords");
                 });
@@ -336,14 +334,14 @@ namespace InventoryManagement.Api.Migrations
             modelBuilder.Entity("InventoryManagement.Api.Features.Transactions.TransactionRecord", b =>
                 {
                     b.HasOne("InventoryManagement.Api.Features.InventoryItems.InventoryItem", "InventoryItem")
-                        .WithOne()
-                        .HasForeignKey("InventoryManagement.Api.Features.Transactions.TransactionRecord", "InventoryItemId")
+                        .WithMany()
+                        .HasForeignKey("InventoryItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("InventoryManagement.Api.Features.Batches.Batch", "BatchOfItem")
-                        .WithOne()
-                        .HasForeignKey("InventoryManagement.Api.Features.Transactions.TransactionRecord", "BatchOfItemBatchNumber", "BatchOfItemInventoryItemId")
+                        .WithMany()
+                        .HasForeignKey("BatchOfItemBatchNumber", "BatchOfItemInventoryItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

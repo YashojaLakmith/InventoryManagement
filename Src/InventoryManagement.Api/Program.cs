@@ -23,7 +23,7 @@ public class Program
         Assembly assembly = typeof(Program).Assembly;
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddOpenApi();
         ConfigureAuthentication(builder.Services);
         ConfigureClaimsPrincipalInjection(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
@@ -37,13 +37,16 @@ public class Program
 
         if (builder.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.MapOpenApi();
+            app.UseDeveloperExceptionPage();
         }
 
-        app.MapSwagger();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.AddApiEndpoints();
+
         await app.UseDatabaseMigrationsAndSeeding();
+
         await app.RunAsync();
     }
 

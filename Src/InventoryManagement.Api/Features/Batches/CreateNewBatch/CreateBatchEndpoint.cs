@@ -23,7 +23,7 @@ public class CreateBatchEndpoint : IEndpoint
             return await CreateNewBatchAsync(newBatchInformation, sender);
         })
             .RequireAuthorization(policy => policy.RequireRole(Roles.SuperUser, Roles.ScheduleManager))
-            .WithBatchEndpointName(BatchEndpointNameConstants.CreateBatch)
+            .WithName(BatchEndpointNameConstants.CreateBatch)
             .Produces(StatusCodes.Status201Created)
             .Produces<List<IError>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)

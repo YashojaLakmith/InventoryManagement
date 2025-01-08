@@ -12,14 +12,12 @@ public class TransactionRecordModelConfiguration : IEntityTypeConfiguration<Tran
         builder.HasKey(prop => prop.RecordId);
 
         builder.HasOne(prop => prop.InventoryItem)
-            .WithOne()
-            .HasForeignKey<TransactionRecord>()
+            .WithMany()
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(prop => prop.BatchOfItem)
-            .WithOne()
-            .HasForeignKey<TransactionRecord>()
+            .WithMany()
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 

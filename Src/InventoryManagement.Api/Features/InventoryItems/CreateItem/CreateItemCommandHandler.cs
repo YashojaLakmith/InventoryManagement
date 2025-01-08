@@ -39,9 +39,9 @@ public class CreateItemCommandHandler : IRequestHandler<NewItemInformation, Resu
             return InvalidDataError.CreateFailureResultFromError<string>(validationResult.Errors);
         }
 
-        if (await _inventoryItemRepository.IsInventoryItemIdInUserAsync(request.ItemId, cancellationToken))
+        if (await _inventoryItemRepository.IsInventoryItemIdInUseAsync(request.ItemId, cancellationToken))
         {
-            return Result.Fail<string>(new AlreadyExistsError($@"{request.ItemId}"));
+            return AlreadyExistsError.CreateFailureResultFromError<string>($@"Item with Id: {request.ItemId}");
         }
 
         InventoryItem newItem = InventoryItem.Create(
