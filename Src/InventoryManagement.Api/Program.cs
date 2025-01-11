@@ -26,6 +26,7 @@ public class Program
         builder.Services.AddOpenApi();
         ConfigureAuthentication(builder.Services);
         ConfigureClaimsPrincipalInjection(builder.Services);
+        ConfigureCaching(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
         builder.Services.AddRepositoryImplementations();
         builder.Services.AddReportGenerators();
@@ -98,5 +99,13 @@ public class Program
             IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
             return httpContextAccessor.HttpContext!.User;
         });
+    }
+
+    private static void ConfigureCaching(IServiceCollection services)
+    {
+        services.AddDistributedMemoryCache();
+#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        services.AddHybridCache();
+#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     }
 }
