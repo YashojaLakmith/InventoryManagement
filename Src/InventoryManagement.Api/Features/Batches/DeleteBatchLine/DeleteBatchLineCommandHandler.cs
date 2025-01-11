@@ -9,6 +9,7 @@ using InventoryManagement.Api.Infrastructure.Database;
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace InventoryManagement.Api.Features.Batches.DeleteBatchLine;
 
@@ -17,15 +18,18 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
     private readonly ApplicationDbContext _dbContext;
     private readonly IValidator<DeleteBatchLineCommand> _validator;
     private readonly ILogger<DeleteBatchLineCommandHandler> _logger;
+    private readonly HybridCache _hybridCache;
 
     public DeleteBatchLineCommandHandler(
         ApplicationDbContext dbContext,
         IValidator<DeleteBatchLineCommand> validator,
-        ILogger<DeleteBatchLineCommandHandler> logger)
+        ILogger<DeleteBatchLineCommandHandler> logger,
+        HybridCache hybridCache)
     {
         _dbContext = dbContext;
         _validator = validator;
         _logger = logger;
+        _hybridCache = hybridCache;
     }
 
     public async Task<Result> Handle(DeleteBatchLineCommand request, CancellationToken cancellationToken)
@@ -66,6 +70,7 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
 
         _dbContext.Batches.Remove(existingBatch);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await _hybridCache.RemoveByTagAsync(@"count:batch", cancellationToken);
         return Result.Ok();
     }
 }
