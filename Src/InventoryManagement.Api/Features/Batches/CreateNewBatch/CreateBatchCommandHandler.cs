@@ -8,6 +8,8 @@ using InventoryManagement.Api.Features.InventoryItems;
 
 using MediatR;
 
+using Microsoft.Extensions.Caching.Hybrid;
+
 namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Result>
@@ -15,18 +17,21 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
     private readonly IBatchRepository _batchRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<NewBatchInformation> _validator;
+    private readonly HybridCache _hybridCache;
     private readonly ILogger<CreateBatchCommandHandler> _logger;
 
     public CreateBatchCommandHandler(
         IBatchRepository batchRepository,
         IUnitOfWork unitOfWork,
         IValidator<NewBatchInformation> validator,
-        ILogger<CreateBatchCommandHandler> logger)
+        ILogger<CreateBatchCommandHandler> logger,
+        HybridCache hybridCache)
     {
         _batchRepository = batchRepository;
         _unitOfWork = unitOfWork;
         _validator = validator;
         _logger = logger;
+        _hybridCache = hybridCache;
     }
 
     public async Task<Result> Handle(NewBatchInformation request, CancellationToken cancellationToken)
@@ -63,6 +68,7 @@ public class CreateBatchCommandHandler : IRequestHandler<NewBatchInformation, Re
 
         _batchRepository.AddBatchLines(batches);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _hybridCache.RemoveByTagAsync(@"count:batch", cancellationToken);
 
         return Result.Ok();
     }
