@@ -80,4 +80,17 @@ public class BatchRepository : IBatchRepository
             ? query.Where(line => line.BatchSize == line.IssuedUnits && line.BatchSize == line.IssuedUnits)
             : query;
     }
+
+    public Task<Batch?> GetBatchLineAsync(string batchNumber, string inventoryItemNumber, CancellationToken cancellation = default)
+    {
+        return _dbContext.Batches
+            .Include(batch => batch.InventoryItem)
+            .Where(batch => batch.BatchNumber == batchNumber && batch.InventoryItem.InventoryItemId == inventoryItemNumber)
+            .FirstOrDefaultAsync(cancellation);
+    }
+
+    public void RemoveBatchLine(Batch batchLine)
+    {
+        _dbContext.Batches.Remove(batchLine);
+    }
 }
