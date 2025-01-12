@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 
 using InventoryManagement.Api.Errors;
+using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Utilities;
 
 using MediatR;
@@ -19,7 +20,7 @@ public class CreateItemEndpoint : IEndpoint
         {
             return await CreateNewItemAsync(itemInformation, sender);
         })
-            .RequireAuthorization()
+            .RequireAuthorization(policy => policy.RequireRole(Roles.SuperUser, Roles.ScheduleManager))
             .WithName(InventoryItemEndpointNameConstants.CreateItem)
             .Produces<List<IResult>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status201Created)

@@ -2,29 +2,31 @@
 
 using FluentValidation;
 using FluentValidation.Results;
+
 using InventoryManagement.Api.Errors;
+using InventoryManagement.Api.Exceptions;
 using InventoryManagement.Api.Features.Batches;
 using InventoryManagement.Api.Features.Transactions.TransactionErrors;
-using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Transactions.GoodsReceive;
 
 public class GoodReceiveCommandHandler : IRequestHandler<RetrievalInformation, Result>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionRepository _transactionRepository;
     private readonly IValidator<RetrievalInformation> _validator;
     private readonly ILogger<GoodReceiveCommandHandler> _logger;
 
     public GoodReceiveCommandHandler(
-        ApplicationDbContext dbContext,
+        IUnitOfWork unitOfWork,
+        ITransactionRepository transactionRepository,
         IValidator<RetrievalInformation> validator,
         ILogger<GoodReceiveCommandHandler> logger)
     {
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
+        _transactionRepository = transactionRepository;
         _validator = validator;
         _logger = logger;
     }
@@ -47,9 +49,9 @@ public class GoodReceiveCommandHandler : IRequestHandler<RetrievalInformation, R
             {
                 return await TryExecutingRetrievalAsync(request, cancellationToken);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ConcurrencyViolationException)
             {
-                _dbContext.ChangeTracker.Clear();
+                _unitOfWork.ClearChanges();
                 _logger.LogInformation(@"Concurrency violation. Trying to execute transaction using updated data.");
             }
         }
@@ -59,10 +61,7 @@ public class GoodReceiveCommandHandler : IRequestHandler<RetrievalInformation, R
 
     private async Task<Result> TryExecutingRetrievalAsync(RetrievalInformation request, CancellationToken cancellationToken)
     {
-        Batch? existingBatch = await _dbContext.Batches
-            .Include(batch => batch.InventoryItem)
-            .FirstOrDefaultAsync(
-                batch => batch.BatchNumber == request.BatchNumber && batch.InventoryItem.InventoryItemId == request.InventoryItemNumber, cancellationToken);
+        Batch? existingBatch = await _transactionRepository.GetBatchLineByIdsAsync(request.InventoryItemNumber, request.BatchNumber, cancellationToken);
 
         if (existingBatch is null)
         {
@@ -75,14 +74,14 @@ public class GoodReceiveCommandHandler : IRequestHandler<RetrievalInformation, R
             return SurplusQuantityError.CreateFailureResultFromError();
         }
 
-        await UpdateDatabase(newTransactionResult, cancellationToken);
+        await UpdateDatabase(newTransactionResult.Value, cancellationToken);
 
         return Result.Ok();
     }
 
-    private Task<int> UpdateDatabase(Result<TransactionRecord> newTransactionResult, CancellationToken cancellationToken)
+    private Task<int> UpdateDatabase(TransactionRecord newTransactionRecord, CancellationToken cancellationToken)
     {
-        _dbContext.TransactionRecords.Add(newTransactionResult.Value);
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        _transactionRepository.AddTransactionRecord(newTransactionRecord);
+        return _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

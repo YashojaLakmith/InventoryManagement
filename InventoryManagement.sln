@@ -5,7 +5,12 @@ VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Api", "Src\InventoryManagement.Api\InventoryManagement.Api.csproj", "{9F8A46D9-5CE7-4F0E-8D92-A6751CF67770}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryManagement.Api.UnitTests", "Tests\InventoryManagement.Api.UnitTests\InventoryManagement.Api.UnitTests.csproj", "{4B5BE51C-8D04-4778-86F7-C2EE221046D4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{AB81340C-F28F-4117-B17F-DC361979EE93}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -18,20 +18,20 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, R
 {
     private readonly UserManager<User> _userManager;
     private readonly ClaimsPrincipal _executingUser;
-    private readonly RoleManager<IdentityRole<int>> _roleManager;
+    private readonly IUserRepository _userRespository;
     private readonly IValidator<AssignRoleInformation> _validator;
     private readonly ILogger<AssignRoleCommandHandler> _logger;
 
     public AssignRoleCommandHandler(
         UserManager<User> userManager,
         IValidator<AssignRoleInformation> validator,
-        RoleManager<IdentityRole<int>> roleManager,
+        IUserRepository userRepository,
         ILogger<AssignRoleCommandHandler> logger,
         ClaimsPrincipal executingUser)
     {
         _userManager = userManager;
         _validator = validator;
-        _roleManager = roleManager;
+        _userRespository = userRepository;
         _logger = logger;
         _executingUser = executingUser;
     }
@@ -84,10 +84,7 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleInformation, R
         User existingUser,
         CancellationToken cancellationToken)
     {
-        HashSet<string> existingRoles = await _roleManager.Roles
-            .AsNoTracking()
-            .Select(r => r.Name!)
-            .ToHashSetAsync(cancellationToken);
+        HashSet<string> existingRoles = await _userRespository.GetAllRoleNamesAsync(cancellationToken);
 
         string[] userProvidedRolesToUpperCase = roles
             .Select(r => r.ToUpper())

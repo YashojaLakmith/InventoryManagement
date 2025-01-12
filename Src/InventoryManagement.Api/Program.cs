@@ -5,7 +5,9 @@ using FluentValidation;
 
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
+using InventoryManagement.Api.Infrastructure.Database.Repositories;
 using InventoryManagement.Api.Infrastructure.Email;
+using InventoryManagement.Api.Infrastructure.Reports;
 using InventoryManagement.Api.Startup;
 using InventoryManagement.Api.Utilities;
 
@@ -21,10 +23,13 @@ public class Program
         Assembly assembly = typeof(Program).Assembly;
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddOpenApi();
         ConfigureAuthentication(builder.Services);
         ConfigureClaimsPrincipalInjection(builder.Services);
+        ConfigureCaching(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
+        builder.Services.AddRepositoryImplementations();
+        builder.Services.AddReportGenerators();
         builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
         builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
         builder.Services.AddSingleton<IEmailSender<User>, EmailSender>();
@@ -33,13 +38,16 @@ public class Program
 
         if (builder.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.MapOpenApi();
+            app.UseDeveloperExceptionPage();
         }
 
-        app.MapSwagger();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.AddApiEndpoints();
+
         await app.UseDatabaseMigrationsAndSeeding();
+
         await app.RunAsync();
     }
 
@@ -91,5 +99,13 @@ public class Program
             IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
             return httpContextAccessor.HttpContext!.User;
         });
+    }
+
+    private static void ConfigureCaching(IServiceCollection services)
+    {
+        services.AddDistributedMemoryCache();
+#pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        services.AddHybridCache();
+#pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     }
 }

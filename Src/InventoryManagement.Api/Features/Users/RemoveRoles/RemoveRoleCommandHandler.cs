@@ -6,37 +6,32 @@ using FluentValidation;
 using FluentValidation.Results;
 
 using InventoryManagement.Api.Errors;
-using InventoryManagement.Api.Infrastructure.Database;
 
 using MediatR;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.Users.RemoveRoles;
 
 public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformation, Result>
 {
-    private readonly ApplicationDbContext _dbContext;
     private readonly UserManager<User> _userManager;
-    private readonly RoleManager<IdentityRole<int>> _roleManager;
     private readonly ClaimsPrincipal _executingUser;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<RemoveRoleCommandHandler> _logger;
     private readonly IValidator<RemoveRoleInformation> _validator;
 
     public RemoveRoleCommandHandler(
         UserManager<User> userManager,
-        RoleManager<IdentityRole<int>> roleManager,
         ILogger<RemoveRoleCommandHandler> logger,
         IValidator<RemoveRoleInformation> validator,
-        ApplicationDbContext dbContext,
+        IUserRepository userRepository,
         ClaimsPrincipal executingUser)
     {
         _userManager = userManager;
-        _roleManager = roleManager;
         _logger = logger;
         _validator = validator;
-        _dbContext = dbContext;
+        _userRepository = userRepository;
         _executingUser = executingUser;
     }
 
@@ -72,7 +67,7 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformation, R
             return UnauthorizedError.CreateFailureResultFromError();
         }
 
-        HashSet<string> existingRoleNames = await GetExistingRoleNamesAsync(cancellationToken);
+        HashSet<string> existingRoleNames = await _userRepository.GetAllRoleNamesAsync(cancellationToken);
         string[] userProvidedRolesInUpperCase = ConvertRoleNamesToUppercase(request);
 
         foreach (string role in userProvidedRolesInUpperCase)
@@ -98,14 +93,6 @@ public class RemoveRoleCommandHandler : IRequestHandler<RemoveRoleInformation, R
     {
         return await _userManager.IsInRoleAsync(executingUser, Roles.UserManager)
                && await _userManager.IsInRoleAsync(targetUser, Roles.UserManager);
-    }
-
-    private Task<HashSet<string>> GetExistingRoleNamesAsync(CancellationToken cancellationToken)
-    {
-        return _dbContext.Roles
-            .AsNoTracking()
-            .Select(role => role.Name!)
-            .ToHashSetAsync(cancellationToken);
     }
 
     private static string[] ConvertRoleNamesToUppercase(RemoveRoleInformation request)

@@ -4,7 +4,7 @@ namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public class NewBatchInformationValidator : AbstractValidator<NewBatchInformation>
 {
-    public NewBatchInformationValidator(IValidator<ItemOrder> validator)
+    public NewBatchInformationValidator(IValidator<ItemOrder> orderValidator)
     {
         RuleFor(x => x.BatchNumber)
             .NotNull()
@@ -18,5 +18,12 @@ public class NewBatchInformationValidator : AbstractValidator<NewBatchInformatio
         RuleFor(x => x.ItemOrders.Count)
             .GreaterThanOrEqualTo(1)
             .WithMessage(@"New batch should have at least one item.");
+
+        RuleFor(x => x.ItemOrders.DistinctBy(o => o.ItemId).Count() == x.ItemOrders.Count())
+            .Equal(true)
+            .WithMessage(@"A single batch cannot have line item of same inventory item.");
+
+        RuleForEach(x => x.ItemOrders)
+            .SetValidator(orderValidator);
     }
 }

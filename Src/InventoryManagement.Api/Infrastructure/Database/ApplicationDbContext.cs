@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Api.Features.Batches;
+﻿using InventoryManagement.Api.Features;
+using InventoryManagement.Api.Features.Batches;
 using InventoryManagement.Api.Features.InventoryItems;
 using InventoryManagement.Api.Features.Transactions;
 using InventoryManagement.Api.Features.Users;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Infrastructure.Database;
 
-public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUnitOfWork
 {
     public DbSet<InventoryItem> InventoryItems { get; private set; }
     public DbSet<Batch> Batches { get; private set; }
@@ -25,5 +26,10 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     {
         optionsBuilder.UseNpgsql(@"Host=127.0.0.1;Database=InventoryManagement;Username=postgres;Password=postgres;");
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+    }
+
+    public void ClearChanges()
+    {
+        ChangeTracker.Clear();
     }
 }

@@ -8,7 +8,8 @@ public static class EndpointExtensions
             .GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Where(type => type.IsAssignableTo(typeof(IEndpoint)) && type.IsClass)
-            .Select(type => (IEndpoint)Activator.CreateInstance(type)!);
+            .Select(type => Activator.CreateInstance(type)!)
+            .OfType<IEndpoint>();
 
         foreach (IEndpoint endpoint in endpointDeclarations)
         {

@@ -1,25 +1,29 @@
 ﻿using FluentResults;
+
 using FluentValidation;
 using FluentValidation.Results;
+
 using InventoryManagement.Api.Errors;
-using InventoryManagement.Api.Infrastructure.Database;
+
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.InventoryItems.DeleteItem;
 
 public class DeleteItemCommandHandler : IRequestHandler<ItemIdToDelete, Result>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IInventoryItemRepository _inventoryItemRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<ItemIdToDelete> _validator;
     private readonly ILogger<DeleteItemCommandHandler> _logger;
 
     public DeleteItemCommandHandler(
-        ApplicationDbContext dbContext,
+        IInventoryItemRepository inventoryItemRepository,
+        IUnitOfWork unitOfWork,
         IValidator<ItemIdToDelete> validator,
         ILogger<DeleteItemCommandHandler> logger)
     {
-        _dbContext = dbContext;
+        _inventoryItemRepository = inventoryItemRepository;
+        _unitOfWork = unitOfWork;
         _validator = validator;
         _logger = logger;
     }
@@ -31,12 +35,10 @@ public class DeleteItemCommandHandler : IRequestHandler<ItemIdToDelete, Result>
         ValidationResult validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
-            return Result.Fail(new InvalidDataError(errorMessages));
+            return InvalidDataError.CreateFailureResultFromError(validationResult.Errors);
         }
 
-        InventoryItem? existingItem = await _dbContext.InventoryItems
-            .FirstOrDefaultAsync(item => item.InventoryItemId == request.ItemId, cancellationToken);
+        InventoryItem? existingItem = await _inventoryItemRepository.GetInventoryItemByIdAsync(request.ItemId, cancellationToken);
         if (existingItem is null)
         {
             return Result.Fail(new NotFoundError(@$"Inventory item with id: {request.ItemId}"));
@@ -49,7 +51,7 @@ public class DeleteItemCommandHandler : IRequestHandler<ItemIdToDelete, Result>
 
     private Task<int> RemoveFromDatabaseAsync(InventoryItem existingItem, CancellationToken cancellationToken)
     {
-        _dbContext.InventoryItems.Remove(existingItem);
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        _inventoryItemRepository.DeleteItem(existingItem);
+        return _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,21 +1,30 @@
 ﻿using FluentResults;
+
 using FluentValidation;
 using FluentValidation.Results;
+
 using InventoryManagement.Api.Errors;
-using InventoryManagement.Api.Infrastructure.Database;
+
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Features.InventoryItems.CreateItem;
 
 public class CreateItemCommandHandler : IRequestHandler<NewItemInformation, Result<string>>
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly IInventoryItemRepository _inventoryItemRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<CreateItemCommandHandler> _logger;
     private readonly IValidator<NewItemInformation> _validator;
 
-    public CreateItemCommandHandler(ApplicationDbContext dbContext, IValidator<NewItemInformation> validator)
+    public CreateItemCommandHandler(
+        IInventoryItemRepository inventoryItemRepository,
+        IUnitOfWork unitOfWork,
+        ILogger<CreateItemCommandHandler> logger,
+        IValidator<NewItemInformation> validator)
     {
-        _dbContext = dbContext;
+        _inventoryItemRepository = inventoryItemRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
         _validator = validator;
     }
 
@@ -27,16 +36,12 @@ public class CreateItemCommandHandler : IRequestHandler<NewItemInformation, Resu
 
         if (!validationResult.IsValid)
         {
-            IEnumerable<string> errorMessages = validationResult.Errors
-                .Select(e => e.ErrorMessage);
-            return Result.Fail<string>(new InvalidDataError(errorMessages));
+            return InvalidDataError.CreateFailureResultFromError<string>(validationResult.Errors);
         }
 
-        bool isItemIdInUse = await _dbContext.InventoryItems
-            .AnyAsync(item => item.InventoryItemId == request.ItemId, cancellationToken);
-        if (isItemIdInUse)
+        if (await _inventoryItemRepository.IsInventoryItemIdInUseAsync(request.ItemId, cancellationToken))
         {
-            return Result.Fail<string>(new AlreadyExistsError($@"{request.ItemId}"));
+            return AlreadyExistsError.CreateFailureResultFromError<string>($@"Item with Id: {request.ItemId}");
         }
 
         InventoryItem newItem = InventoryItem.Create(
@@ -51,7 +56,7 @@ public class CreateItemCommandHandler : IRequestHandler<NewItemInformation, Resu
 
     private Task<int> AddToDatabaseAsync(InventoryItem newItem, CancellationToken cancellationToken)
     {
-        _dbContext.Add(newItem);
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        _inventoryItemRepository.CreateNewItem(newItem);
+        return _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
