@@ -9,4 +9,6 @@ public interface IBatchRepository
     Task<InventoryItem?> GetInventoryItemByIdAsync(string id, CancellationToken cancellationToken = default);
     void AddBatchLines(IReadOnlyCollection<Batch> batchLines);
     Task<BatchNumberListResult> GetBatchNumberListAsync(BatchNumberFilter filter, CancellationToken cancellationToken = default);
+    Task<Batch?> GetBatchLineAsync(string batchNumber, string inventoryItemNumber, CancellationToken cancellation = default);
+    void RemoveBatchLine(Batch batchLine);
 }
