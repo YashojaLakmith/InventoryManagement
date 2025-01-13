@@ -119,4 +119,44 @@ public class RequestPasswordResetQueryHandlerTests
             It.IsAny<string>()),
             Times.Never);
     }
+
+    [Test]
+    public async Task Handle_OnUserNotExists_ReturnFailureResultWithNotFoundError()
+    {
+        // Arrange
+        using CancellationTokenSource tokenSource = new();
+        RequestPasswordResetQuery sampleQuery = new(@"samplemail@test.mail");
+
+        _validatorMock.Setup(v => v.ValidateAsync(sampleQuery, tokenSource.Token))
+            .Returns(Task.FromResult(new ValidationResult()));
+
+        _userManagerMock.Setup(um => um.FindByEmailAsync(sampleQuery.EmailAddress))
+            .Returns(Task.FromResult<User?>(null));
+
+        // Act
+        Result result = await _handler.Handle(sampleQuery, tokenSource.Token);
+
+        // Assert
+        result.IsFailed.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e => e.GetType() == typeof(NotFoundError));
+
+        _validatorMock.Verify(v => v.ValidateAsync(
+            It.Is<RequestPasswordResetQuery>(query => query == sampleQuery),
+            It.Is<CancellationToken>(ct => ct == tokenSource.Token)),
+            Times.Once);
+
+        _userManagerMock.Verify(um => um.FindByEmailAsync(
+            It.Is<string>(email => email == sampleQuery.EmailAddress)),
+            Times.Once);
+
+        _userManagerMock.Verify(um => um.GeneratePasswordResetTokenAsync(
+            It.IsAny<User>()),
+            Times.Never);
+
+        _emailSenderMock.Verify(es => es.SendPasswordResetCodeAsync(
+            It.IsAny<User>(),
+            It.IsAny<string>(),
+            It.IsAny<string>()),
+            Times.Never);
+    }
 }
