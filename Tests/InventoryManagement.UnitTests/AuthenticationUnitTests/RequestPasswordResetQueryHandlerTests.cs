@@ -5,6 +5,7 @@ using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
 
+using InventoryManagement.Api.Errors;
 using InventoryManagement.Api.Features.Authentication.RequestPasswordReset;
 using InventoryManagement.Api.Features.Users;
 
@@ -79,5 +80,43 @@ public class RequestPasswordResetQueryHandlerTests
             It.Is<string>(email => email == sampleUser.Email && email == sampleQuery.EmailAddress),
             It.Is<string>(code => code == sampleToken)),
             Times.Once);
+    }
+
+    [Test]
+    public async Task Handle_OnInvalidRequestData_ReturnFailureResultWithInvalidDataError()
+    {
+        // Arrange
+        using CancellationTokenSource tokenSource = new();
+        RequestPasswordResetQuery sampleQuery = new(@"");
+        ValidationFailure sampleFailure = new(nameof(sampleQuery.EmailAddress), @"Email is invalid");
+
+        _validatorMock.Setup(v => v.ValidateAsync(sampleQuery, tokenSource.Token))
+            .Returns(Task.FromResult(new ValidationResult([sampleFailure])));
+
+        // Act
+        Result result = await _handler.Handle(sampleQuery, tokenSource.Token);
+
+        // Assert
+        result.IsFailed.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e => e.GetType() == typeof(InvalidDataError));
+
+        _validatorMock.Verify(v => v.ValidateAsync(
+            It.Is<RequestPasswordResetQuery>(query => query == sampleQuery),
+            It.Is<CancellationToken>(ct => ct == tokenSource.Token)),
+            Times.Once);
+
+        _userManagerMock.Verify(um => um.FindByEmailAsync(
+            It.IsAny<string>()),
+            Times.Never);
+
+        _userManagerMock.Verify(um => um.GeneratePasswordResetTokenAsync(
+            It.IsAny<User>()),
+            Times.Never);
+
+        _emailSenderMock.Verify(es => es.SendPasswordResetCodeAsync(
+            It.IsAny<User>(),
+            It.IsAny<string>(),
+            It.IsAny<string>()),
+            Times.Never);
     }
 }
