@@ -4,6 +4,7 @@ using System.Security.Claims;
 using FluentValidation;
 
 using InventoryManagement.Api.Features.Users;
+using InventoryManagement.Api.Infrastructure.Caching;
 using InventoryManagement.Api.Infrastructure.Database;
 using InventoryManagement.Api.Infrastructure.Database.Repositories;
 using InventoryManagement.Api.Infrastructure.Email;
@@ -11,6 +12,7 @@ using InventoryManagement.Api.Infrastructure.Reports;
 using InventoryManagement.Api.Startup;
 using InventoryManagement.Api.Utilities;
 
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 
 namespace InventoryManagement.Api;
@@ -22,11 +24,12 @@ public class Program
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         Assembly assembly = typeof(Program).Assembly;
 
+        ConfigureCaching(builder.Services);
+        builder.Services.AddSingleton<ITicketStore, TicketStore>();
+        ConfigureAuthentication(builder.Services);
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi();
-        ConfigureAuthentication(builder.Services);
         ConfigureClaimsPrincipalInjection(builder.Services);
-        ConfigureCaching(builder.Services);
         builder.Services.AddDbContext<ApplicationDbContext>();
         builder.Services.AddRepositoryImplementations();
         builder.Services.AddReportGenerators();
@@ -74,6 +77,7 @@ public class Program
                 config.Cookie.IsEssential = true;
                 config.SlidingExpiration = true;
                 config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                config.SessionStore = services.BuildServiceProvider().GetRequiredService<ITicketStore>();
 
                 config.Events.OnRedirectToLogin = context =>
                 {
