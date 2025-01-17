@@ -1,18 +1,15 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Users.CreateUser;
 
 public class NewUserInformationValidator : AbstractValidator<NewUserInformation>
 {
-    public NewUserInformationValidator()
+    public NewUserInformationValidator(IValidator<Email> emailValidator, IValidator<Password> passwordValidator)
     {
-        RuleFor(info => info.EmailAddress)
-            .NotEmpty()
-            .WithMessage(@"Email address is required.");
-
-        RuleFor(info => info.EmailAddress)
-            .EmailAddress()
-            .WithMessage(@"Valid email address is required.");
+        RuleFor(info => new Email(info.EmailAddress))
+            .SetValidator(emailValidator);
 
         RuleFor(info => info.UserName)
             .NotEmpty()
@@ -22,12 +19,7 @@ public class NewUserInformationValidator : AbstractValidator<NewUserInformation>
             .Length(3, 50)
             .WithMessage(@"User name length must be between 3 and 50 characters.");
 
-        RuleFor(info => info.Password)
-            .NotEmpty()
-            .WithMessage(@"Password is required.");
-        
-        RuleFor(info => info.Password)
-            .Matches(@"^(?=.*[a-z])(?=.*[A-Z]).{7,15}$")
-            .WithMessage(@"Password must be between 7 and 15 characters in length and must contain at least one upper case and lowercase letter.");
+        RuleFor(info => new Password(info.Password))
+            .SetValidator(passwordValidator);
     }
 }
