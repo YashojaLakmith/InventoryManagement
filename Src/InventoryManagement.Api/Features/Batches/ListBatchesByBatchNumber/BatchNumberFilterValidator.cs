@@ -1,15 +1,15 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Batches.ListBatchesByBatchNumber;
 
 public class BatchNumberFilterValidator : AbstractValidator<BatchNumberFilter>
 {
-    public BatchNumberFilterValidator()
+    public BatchNumberFilterValidator(IValidator<InventoryItemNumber> itemNumberValidator)
     {
-        RuleFor(x => x.InventoryItemId)
-            .MinimumLength(1)
-            .MaximumLength(25)
-            .WithMessage(@"Item id must have at least 1 character and less than 25 characters.")
+        RuleFor(x => new InventoryItemNumber(x.InventoryItemId!))
+            .SetValidator(itemNumberValidator)
             .When(x => !string.IsNullOrWhiteSpace(x.InventoryItemId));
 
         RuleFor(x => x.IgnoreInactive)

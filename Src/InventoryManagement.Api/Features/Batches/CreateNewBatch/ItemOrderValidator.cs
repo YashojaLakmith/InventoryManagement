@@ -1,20 +1,15 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public class ItemOrderValidator : AbstractValidator<ItemOrder>
 {
-    public ItemOrderValidator()
+    public ItemOrderValidator(IValidator<InventoryItemNumber> itemNumberValidator)
     {
-        RuleFor(x => x.ItemId)
-            .NotEmpty()
-            .NotNull()
-            .WithMessage(@"Item Id is required.");
-
-        RuleFor(x => x.ItemId.Length)
-            .LessThanOrEqualTo(25)
-            .GreaterThanOrEqualTo(1)
-            .WithMessage(@"Item id must have at least 1 character and less than 25 characters.");
+        RuleFor(x => new InventoryItemNumber(x.ItemId))
+            .SetValidator(itemNumberValidator);
 
         RuleFor(x => x.CostPerUnit)
             .NotEmpty()
