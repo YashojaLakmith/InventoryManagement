@@ -14,7 +14,7 @@ public class LogoutEndpoint : IEndpoint
             async (
                 SignInManager<User> signInManager) =>
         {
-            return await SignOutAsync(signInManager);
+            return await LogOutAsync(signInManager);
         })
             .RequireAuthorization()
             .WithName(AuthenticationEndpointNameConstants.LogoutEndpoint)
@@ -22,7 +22,7 @@ public class LogoutEndpoint : IEndpoint
             .Produces(StatusCodes.Status401Unauthorized);
     }
 
-    private static async Task<IResult> SignOutAsync(SignInManager<User> signInManager)
+    public static async Task<IResult> LogOutAsync(SignInManager<User> signInManager)
     {
         await signInManager.SignOutAsync();
         return Results.Ok();
