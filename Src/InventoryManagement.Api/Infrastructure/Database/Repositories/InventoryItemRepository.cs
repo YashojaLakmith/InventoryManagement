@@ -40,17 +40,17 @@ public class InventoryItemRepository : IInventoryItemRepository
     {
         return $"""
                 SELECT 
-            	    i."InventoryItemId" AS "ItemId",
-            	    i."ItemName" AS "ItemName",
-            	    i."MeasurementUnit" AS "MeasurementUnit",
+            	    inv."InventoryItemId" AS "ItemId",
+            	    inv."ItemName" AS "ItemName",
+            	    inv."MeasurementUnit" AS "MeasurementUnit",
             	    SUM(b."ReceivedUnits" - b."IssuedUnits") AS "AvailableQuantity",
-            	    ROUND(SUM((b."ReceivedUnits" - b."IssuedUnits") * b."CostPerUnit") / COUNT(*), 2) AS "WeightedAverageCostOfUnit"
+            	    ROUND(SUM((b."ReceivedUnits" - b."IssuedUnits") * b."CostPerUnit") / COUNT(*), 2) AS "WeightedAverageCostPerUnit"
                 FROM "Batches" AS b
-                INNER JOIN "InventoryItems" AS i ON b."InventoryItemId" = i."InventoryItemId"
+                INNER JOIN "InventoryItems" AS inv ON b."InventoryItemId" = inv."InventoryItemId"
                 WHERE 
                     b."InventoryItemId" = {itemId} AND
                     b."IssuedUnits" < b."ReceivedUnits"
-                GROUP BY i."InventoryItemId", i."ItemName", i."MeasurementUnit"
+                GROUP BY inv."InventoryItemId", inv."ItemName", inv."MeasurementUnit"
             """;
     }
 
