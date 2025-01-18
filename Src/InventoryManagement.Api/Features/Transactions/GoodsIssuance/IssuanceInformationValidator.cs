@@ -1,28 +1,19 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Transactions.GoodsIssuance;
 
 public class IssuanceInformationValidator : AbstractValidator<IssuanceInformation>
 {
-    public IssuanceInformationValidator()
+    public IssuanceInformationValidator(IValidator<BatchNumber> batchNumberValidator, IValidator<InventoryItemNumber> itemNumberValidator)
     {
-        RuleFor(x => x.BatchNumber)
-            .NotNull()
-            .NotEmpty()
-            .WithMessage(@"Batch number is required.");
+        RuleFor(x => new BatchNumber(x.BatchNumber))
+            .SetValidator(batchNumberValidator);
 
-        RuleFor(x => x.BatchNumber)
-            .Length(1, 25)
-            .WithMessage(@"Batch number should be no less than 1 character or more than 25 characters.");
-        
-        RuleFor(info => info.ItemId)
-            .NotEmpty()
-            .WithMessage(@"Item Id cannot be empty");
-        
-        RuleFor(info => info.ItemId)
-            .Length(3, 25)
-            .WithMessage(@"Item Id must be between 3 and 25 characters");
-        
+        RuleFor(info => new InventoryItemNumber(info.ItemId))
+            .SetValidator(itemNumberValidator);
+
         RuleFor(info => info.NumberOfItemsToIssue)
             .NotEmpty()
             .WithMessage(@"Number of items to issue cannot be empty");
@@ -30,7 +21,7 @@ public class IssuanceInformationValidator : AbstractValidator<IssuanceInformatio
         RuleFor(info => info.NumberOfItemsToIssue)
             .GreaterThanOrEqualTo(1)
             .WithMessage(@"Number of items to issue should at least be 1");
-        
+
         RuleFor(info => info.NumberOfItemsToIssue)
             .LessThanOrEqualTo(int.MaxValue)
             .WithMessage(@$"Number of items to issue should at most {int.MaxValue}");
