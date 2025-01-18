@@ -6,7 +6,7 @@ namespace InventoryManagement.Api.Features.Users.RemoveRoles;
 
 public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInformation>
 {
-    public RemoveRoleInformationValidator(IValidator<UserId> userIdValidator)
+    public RemoveRoleInformationValidator(IValidator<UserId> userIdValidator, IValidator<RoleName> roleNameValidator)
     {
         RuleFor(info => info.RolesToRemove.Distinct().Count() == info.RolesToRemove.Count)
             .Equal(true)
@@ -24,17 +24,8 @@ public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInform
             .Equal(false)
             .WithMessage(@"Super user roles are non-modifiable.");
 
-        RuleForEach(info => info.RolesToRemove)
-            .NotEmpty()
-            .WithMessage(@"Role name cannot be empty.");
-
-        RuleForEach(info => info.RolesToRemove)
-            .Length(1, 10)
-            .WithMessage(@"Role name should have maximum character length of 10.");
-
-        RuleFor(info => info.RolesToRemove.Any(role => role.Contains(',')))
-            .Equal(false)
-            .WithMessage(@"Role name contains invalid characters.");
+        RuleForEach(info => info.RolesToRemove.Select(role => new RoleName(role)))
+            .SetValidator(roleNameValidator);
 
         RuleFor(info => new UserId(info.UserId))
             .SetValidator(userIdValidator);
