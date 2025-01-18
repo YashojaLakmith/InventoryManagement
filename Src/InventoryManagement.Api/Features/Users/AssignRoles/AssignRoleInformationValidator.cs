@@ -1,10 +1,12 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Users.AssignRoles;
 
 public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInformation>
 {
-    public AssignRoleInformationValidator()
+    public AssignRoleInformationValidator(IValidator<UserId> userIdValidator)
     {
         RuleFor(info => info.RolesToAssign.Distinct().Count() == info.RolesToAssign.Count)
             .Equal(true)
@@ -34,16 +36,7 @@ public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInform
             .Equal(false)
             .WithMessage(@"Role name contains invalid characters.");
 
-        RuleFor(info => info.UserId)
-            .NotEmpty()
-            .WithMessage("UserId cannot be empty");
-
-        RuleFor(info => info.UserId)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("Invalid UserId");
-
-        RuleFor(info => info.UserId)
-            .LessThanOrEqualTo(int.MaxValue)
-            .WithMessage("Invalid UserId");
+        RuleFor(info => new UserId(info.UserId))
+            .SetValidator(userIdValidator);
     }
 }
