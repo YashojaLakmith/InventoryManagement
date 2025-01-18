@@ -8,9 +8,7 @@ public class UserIdValidator : AbstractValidator<UserId>
     {
         RuleFor(info => info.Value)
             .NotNull()
-            .WithMessage("UserId is required.");
-
-        RuleFor(info => info.Value)
+            .WithMessage("UserId is required.")
             .LessThanOrEqualTo(int.MaxValue)
             .WithMessage(@"User Id value is too high.")
             .GreaterThanOrEqualTo(1)
