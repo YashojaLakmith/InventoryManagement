@@ -1,24 +1,17 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Authentication.Login;
 
 public class LoginInformationValidator : AbstractValidator<LoginInformation>
 {
-    public LoginInformationValidator()
+    public LoginInformationValidator(IValidator<Email> emailValidator, IValidator<Password> passwordValidator)
     {
-        RuleFor(info => info.EmailAddress)
-            .NotNull()
-            .NotEmpty()
-            .EmailAddress()
-            .WithMessage(@"Email address should be a valid email.");
+        RuleFor(info => new Email(info.EmailAddress))
+            .SetValidator(emailValidator);
 
-        RuleFor(info => info.Password)
-            .NotNull()
-            .NotEmpty()
-            .WithMessage(@"Password should not be empty.");
-
-        RuleFor(info => info.Password)
-            .Matches(@"^(?=.*[a-z])(?=.*[A-Z]).{7,15}$")
-            .WithMessage(@"Password must be between 7 and 15 characters in length and must contain at least one upper case and lowercase letter.");
+        RuleFor(info => new Password(info.Password))
+            .SetValidator(passwordValidator);
     }
 }

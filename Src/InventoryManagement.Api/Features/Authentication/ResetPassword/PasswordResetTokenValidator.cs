@@ -1,21 +1,18 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Authentication.ResetPassword;
 
 public class PasswordResetTokenValidator : AbstractValidator<PasswordResetTokenData>
 {
-    public PasswordResetTokenValidator()
+    public PasswordResetTokenValidator(IValidator<Email> emailValidator, IValidator<Password> passwordValidator)
     {
-        RuleFor(info => info.EmailAddress)
-            .NotEmpty()
-            .EmailAddress()
-            .WithMessage(@"Email address should be a valid email.");
+        RuleFor(info => new Email(info.EmailAddress))
+            .SetValidator(emailValidator);
 
-        RuleFor(info => info.NewPassword)
-            .NotEmpty()
-            .WithMessage(@"New password should not be empty.")
-            .Matches(@"^(?=.*[a-z])(?=.*[A-Z]).{7,15}$")
-            .WithMessage(@"Password must be between 7 and 15 characters in length and must contain at least one upper case and lowercase letter.");
+        RuleFor(info => new Password(info.NewPassword))
+            .SetValidator(passwordValidator);
 
         RuleFor(info => info.ResetToken)
             .NotEmpty()

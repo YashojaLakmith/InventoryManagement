@@ -1,10 +1,12 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Users.RemoveRoles;
 
 public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInformation>
 {
-    public RemoveRoleInformationValidator()
+    public RemoveRoleInformationValidator(IValidator<UserId> userIdValidator, IValidator<RoleName> roleNameValidator)
     {
         RuleFor(info => info.RolesToRemove.Distinct().Count() == info.RolesToRemove.Count)
             .Equal(true)
@@ -22,28 +24,10 @@ public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInform
             .Equal(false)
             .WithMessage(@"Super user roles are non-modifiable.");
 
-        RuleForEach(info => info.RolesToRemove)
-            .NotEmpty()
-            .WithMessage(@"Role name cannot be empty.");
+        RuleForEach(info => info.RolesToRemove.Select(role => new RoleName(role)))
+            .SetValidator(roleNameValidator);
 
-        RuleForEach(info => info.RolesToRemove)
-            .Length(1, 10)
-            .WithMessage(@"Role name should have maximum character length of 10.");
-
-        RuleFor(info => info.RolesToRemove.Any(role => role.Contains(',')))
-            .Equal(false)
-            .WithMessage(@"Role name contains invalid characters.");
-
-        RuleFor(info => info.UserId)
-            .NotEmpty()
-            .WithMessage("UserId cannot be empty");
-
-        RuleFor(info => info.UserId)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("Invalid UserId");
-
-        RuleFor(info => info.UserId)
-            .LessThanOrEqualTo(int.MaxValue)
-            .WithMessage("Invalid UserId");
+        RuleFor(info => new UserId(info.UserId))
+            .SetValidator(userIdValidator);
     }
 }
