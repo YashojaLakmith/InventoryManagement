@@ -1,15 +1,14 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.InventoryItems.ViewItem;
 
 public class ViewItemQueryValidator : AbstractValidator<ViewItemQuery>
 {
-    public ViewItemQueryValidator()
+    public ViewItemQueryValidator(IValidator<InventoryItemNumber> itemNumberValidator)
     {
-        RuleFor(query => query.ItemId)
-            .NotEmpty()
-            .WithMessage("Item Id is required.")
-            .Length(3, 25)
-            .WithMessage("Item Id must be between 3 and 25 characters.");
+        RuleFor(query => new InventoryItemNumber(query.ItemId))
+            .SetValidator(itemNumberValidator);
     }
 }
