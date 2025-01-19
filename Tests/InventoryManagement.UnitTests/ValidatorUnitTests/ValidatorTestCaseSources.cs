@@ -1,4 +1,5 @@
 ﻿using InventoryManagement.Api.Features.Authentication.Login;
+using InventoryManagement.Api.Features.Authentication.ResetPassword;
 
 namespace InventoryManagement.UnitTests.ValidatorUnitTests;
 internal class ValidatorTestCaseSources
@@ -41,17 +42,82 @@ internal class ValidatorTestCaseSources
         yield return null;
     }
 
+    public static IEnumerable<string> ValidEmailSource()
+    {
+        yield return "alice.smith@example.com";
+        yield return "john.doe123@company.co";
+        yield return "mary.jane_98@domain.org";
+        yield return "charlie+test@mail.net";
+        yield return "emily.williams@web-service.info";
+        yield return "david.brown99@service.biz";
+        yield return "oliver_lee@site.co.uk";
+        yield return "sophia.miller@address.us";
+        yield return "james_bond007@movies.edu";
+        yield return "mia.wilson@internet.club";
+    }
+
+    public static IEnumerable<string> ValidPasswordSource()
+    {
+        yield return "PaSsWoRd7";
+        yield return "AbCdEfG123";
+        yield return "TeStStr1ng";
+        yield return "ComPlEx9";
+        yield return "SeCurE01";
+        yield return "VerIfY12";
+        yield return "Pass123Word";
+        yield return "TestStringA";
+        yield return "SimPleEx8";
+        yield return "ChEcKIt12";
+    }
+
     public static IEnumerable<LoginInformation> ValidEmailAndPasswordSource()
     {
-        yield return new LoginInformation("alice.smith@example.com", "PaSsWoRd7");
-        yield return new LoginInformation("john.doe123@company.co", "AbCdEfG123");
-        yield return new LoginInformation("mary.jane_98@domain.org", "TeStStr1ng");
-        yield return new LoginInformation("charlie+test@mail.net", "ComPlEx9");
-        yield return new LoginInformation("emily.williams@web-service.info", "SeCurE01");
-        yield return new LoginInformation("david.brown99@service.biz", "VerIfY12");
-        yield return new LoginInformation("oliver_lee@site.co.uk", "Pass123Word");
-        yield return new LoginInformation("sophia.miller@address.us", "TestStringA");
-        yield return new LoginInformation("james_bond007@movies.edu", "SimPleEx8");
-        yield return new LoginInformation("mia.wilson@internet.club", "ChEcKIt12");
+        using IEnumerator<string> emailEnumerator = ValidEmailSource().GetEnumerator();
+        using IEnumerator<string> passwordEnumerator = ValidPasswordSource().GetEnumerator();
+
+        while (emailEnumerator.MoveNext())
+        {
+            if (passwordEnumerator.MoveNext())
+            {
+                yield return new LoginInformation(emailEnumerator.Current, passwordEnumerator.Current);
+            }
+            else
+            {
+                yield break;
+            }
+        }
+    }
+
+    public static IEnumerable<PasswordResetTokenData> ValidPasswordResetDataSource()
+    {
+        using IEnumerator<string> emailSourceEnumerator = ValidEmailSource().GetEnumerator();
+        using IEnumerator<string> passwordSourceEnumerator = ValidPasswordSource().GetEnumerator();
+        using IEnumerator<string> resetTokenSourceEnumerator = ResetTokenSource().GetEnumerator();
+
+        while (emailSourceEnumerator.MoveNext())
+        {
+            if (passwordSourceEnumerator.MoveNext() && resetTokenSourceEnumerator.MoveNext())
+            {
+                yield return new PasswordResetTokenData(emailSourceEnumerator.Current, resetTokenSourceEnumerator.Current, passwordSourceEnumerator.Current);
+            }
+            else
+            {
+                yield break;
+            }
+        }
+    }
+
+    private static IEnumerable<string> ResetTokenSource()
+    {
+        yield return "1245353";
+        yield return "5etrer5de5";
+        yield return "46rr5rr";
+        yield return "6354erfge5";
+        yield return "er654r4t";
+        yield return "645343g";
+        yield return "lab92vb";
+        yield return "a549783";
+        yield return "1074547433";
+        yield return "nueludnaym4";
     }
 }

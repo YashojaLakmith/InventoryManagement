@@ -21,7 +21,7 @@ public class LoginInformationValidatorTests
     public async Task Validate_WithInvalidEmail_ShouldReturnValidationFailure(string? emailAdress)
     {
         // Arrange
-        LoginInformation sampleLoginInformation = new(emailAdress!, @"ValidPassword123");
+        LoginInformation sampleLoginInformation = new(emailAdress!, @"ValidPassword1");
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(sampleLoginInformation);
