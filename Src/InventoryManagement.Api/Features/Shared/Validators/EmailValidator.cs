@@ -24,7 +24,7 @@ public class EmailValidator : AbstractValidator<Email>
             .WithMessage(InvalidEmailMessage)
             .MaximumLength(256)
             .WithMessage(InvalidEmailMessage)
-            .Matches(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+            .Matches(@"^(?!.*\.\.)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
             .WithMessage(InvalidEmailMessage);
     }
 }

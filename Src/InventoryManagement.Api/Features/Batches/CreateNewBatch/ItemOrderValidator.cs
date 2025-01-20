@@ -25,6 +25,8 @@ public class ItemOrderValidator : AbstractValidator<ItemOrder>
 
         RuleFor(x => x.BatchSize)
             .GreaterThanOrEqualTo(1)
-            .WithMessage(@"Item count must be greater than 0");
+            .WithMessage(@"Item count must be greater than 0")
+            .LessThan(int.MaxValue)
+            .WithMessage(@"Item count is too high.");
     }
 }
