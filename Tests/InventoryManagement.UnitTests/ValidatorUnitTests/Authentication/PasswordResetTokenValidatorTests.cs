@@ -14,7 +14,7 @@ public class PasswordResetTokenValidatorTests
     [SetUp]
     public void Setup()
     {
-        _validator = new PasswordResetTokenValidator(SharedValidatorInstances.EmailValidator, SharedValidatorInstances.PasswordValidator);
+        _validator = new PasswordResetTokenValidator();
     }
 
     [Test, TestCaseSource(typeof(ValidatorTestCaseSources), nameof(ValidatorTestCaseSources.InvalidEmailSource))]

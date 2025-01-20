@@ -14,7 +14,7 @@ public class DeleteBatchLineCommandValidatorTests
     [SetUp]
     public void Setup()
     {
-        _validator = new DeleteBatchLineCommandValidator(SharedValidatorInstances.BatchNumberValidator);
+        _validator = new DeleteBatchLineCommandValidator();
     }
 
     [Test, TestCaseSource(typeof(ValidatorTestCaseSources), nameof(ValidatorTestCaseSources.InvalidBatchNumberSource))]

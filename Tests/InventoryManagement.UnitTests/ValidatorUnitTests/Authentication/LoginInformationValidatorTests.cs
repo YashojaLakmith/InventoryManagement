@@ -14,7 +14,7 @@ public class LoginInformationValidatorTests
     [SetUp]
     public void Setup()
     {
-        _validator = new LoginInformationValidator(SharedValidatorInstances.EmailValidator, SharedValidatorInstances.PasswordValidator);
+        _validator = new LoginInformationValidator();
     }
 
     [Test, TestCaseSource(typeof(ValidatorTestCaseSources), nameof(ValidatorTestCaseSources.InvalidEmailSource))]

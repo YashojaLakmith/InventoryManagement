@@ -14,7 +14,7 @@ public class RequestPasswordResetQueryValidatorTests
     [SetUp]
     public void Setup()
     {
-        _validator = new RequestPasswordResetQueryValidator(SharedValidatorInstances.EmailValidator);
+        _validator = new RequestPasswordResetQueryValidator();
     }
 
     [Test, TestCaseSource(typeof(ValidatorTestCaseSources), nameof(ValidatorTestCaseSources.InvalidEmailSource))]

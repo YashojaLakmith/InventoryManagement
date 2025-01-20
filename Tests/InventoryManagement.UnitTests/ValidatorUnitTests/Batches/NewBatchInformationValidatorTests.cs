@@ -16,9 +16,7 @@ public class NewBatchInformationValidatorTests
     [SetUp]
     public void Setup()
     {
-        _validator = new NewBatchInformationValidator(
-            new ItemOrderValidator(SharedValidatorInstances.InventoryItemNumberValidator),
-            SharedValidatorInstances.BatchNumberValidator);
+        _validator = new NewBatchInformationValidator();
     }
 
     [Test, TestCaseSource(typeof(ValidatorTestCaseSources), nameof(ValidatorTestCaseSources.InvalidBatchNumberSource))]
