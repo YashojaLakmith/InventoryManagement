@@ -4,7 +4,18 @@ namespace InventoryManagement.Api.Features.Shared.Validators;
 
 public class BatchNumberValidator : AbstractValidator<BatchNumber>
 {
-    public BatchNumberValidator()
+    private static BatchNumberValidator? _instance;
+
+    public static BatchNumberValidator Instance
+    {
+        get
+        {
+            _instance ??= new BatchNumberValidator();
+            return _instance;
+        }
+    }
+
+    private BatchNumberValidator()
     {
         RuleFor(batchNumber => batchNumber.Value)
             .NotEmpty()

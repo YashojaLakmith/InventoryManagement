@@ -6,9 +6,9 @@ namespace InventoryManagement.Api.Features.InventoryItems.DeleteItem;
 
 public class ItemIdToDeleteValidator : AbstractValidator<ItemIdToDelete>
 {
-    public ItemIdToDeleteValidator(IValidator<InventoryItemNumber> itemNumberValidator)
+    public ItemIdToDeleteValidator()
     {
         RuleFor(info => new InventoryItemNumber(info.ItemId))
-            .SetValidator(itemNumberValidator);
+            .SetValidator(InventoryItemNumberValidator.Instance);
     }
 }

@@ -6,13 +6,13 @@ namespace InventoryManagement.Api.Features.Transactions.GoodsIssuance;
 
 public class IssuanceInformationValidator : AbstractValidator<IssuanceInformation>
 {
-    public IssuanceInformationValidator(IValidator<BatchNumber> batchNumberValidator, IValidator<InventoryItemNumber> itemNumberValidator)
+    public IssuanceInformationValidator()
     {
         RuleFor(x => new BatchNumber(x.BatchNumber))
-            .SetValidator(batchNumberValidator);
+            .SetValidator(BatchNumberValidator.Instance);
 
         RuleFor(info => new InventoryItemNumber(info.ItemId))
-            .SetValidator(itemNumberValidator);
+            .SetValidator(InventoryItemNumberValidator.Instance);
 
         RuleFor(info => info.NumberOfItemsToIssue)
             .NotEmpty()

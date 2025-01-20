@@ -4,7 +4,18 @@ namespace InventoryManagement.Api.Features.Shared.Validators;
 
 public class InventoryItemNumberValidator : AbstractValidator<InventoryItemNumber>
 {
-    public InventoryItemNumberValidator()
+    private static InventoryItemNumberValidator? _instance;
+
+    public static InventoryItemNumberValidator Instance
+    {
+        get
+        {
+            _instance ??= new InventoryItemNumberValidator();
+            return _instance;
+        }
+    }
+
+    private InventoryItemNumberValidator()
     {
         RuleFor(itemNumber => itemNumber.Value)
             .NotEmpty()

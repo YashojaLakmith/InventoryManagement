@@ -6,13 +6,13 @@ namespace InventoryManagement.Api.Features.Authentication.ResetPassword;
 
 public class PasswordResetTokenValidator : AbstractValidator<PasswordResetTokenData>
 {
-    public PasswordResetTokenValidator(IValidator<Email> emailValidator, IValidator<Password> passwordValidator)
+    public PasswordResetTokenValidator()
     {
         RuleFor(info => new Email(info.EmailAddress))
-            .SetValidator(emailValidator);
+            .SetValidator(EmailValidator.Instance);
 
         RuleFor(info => new Password(info.NewPassword))
-            .SetValidator(passwordValidator);
+            .SetValidator(PasswordValidator.Instance);
 
         RuleFor(info => info.ResetToken)
             .NotEmpty()

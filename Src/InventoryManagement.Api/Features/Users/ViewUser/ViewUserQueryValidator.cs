@@ -6,9 +6,9 @@ namespace InventoryManagement.Api.Features.Users.ViewUser;
 
 public class ViewUserQueryValidator : AbstractValidator<UserIdQuery>
 {
-    public ViewUserQueryValidator(IValidator<UserId> userIdValidator)
+    public ViewUserQueryValidator()
     {
         RuleFor(info => new UserId(info.UserId))
-            .SetValidator(userIdValidator);
+            .SetValidator(UserIdValidator.Instance);
     }
 }
