@@ -4,7 +4,18 @@ namespace InventoryManagement.Api.Features.Shared.Validators;
 
 public class UserIdValidator : AbstractValidator<UserId>
 {
-    public UserIdValidator()
+    private static UserIdValidator? _instance;
+
+    public static UserIdValidator Instance
+    {
+        get
+        {
+            _instance ??= new UserIdValidator();
+            return _instance;
+        }
+    }
+
+    private UserIdValidator()
     {
         RuleFor(info => info.Value)
             .NotNull()

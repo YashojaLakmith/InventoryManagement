@@ -6,10 +6,10 @@ namespace InventoryManagement.Api.Features.Users.CreateUser;
 
 public class NewUserInformationValidator : AbstractValidator<NewUserInformation>
 {
-    public NewUserInformationValidator(IValidator<Email> emailValidator, IValidator<Password> passwordValidator)
+    public NewUserInformationValidator()
     {
         RuleFor(info => new Email(info.EmailAddress))
-            .SetValidator(emailValidator);
+            .SetValidator(EmailValidator.Instance);
 
         RuleFor(info => info.UserName)
             .NotEmpty()
@@ -20,6 +20,6 @@ public class NewUserInformationValidator : AbstractValidator<NewUserInformation>
             .WithMessage(@"User name length must be between 3 and 50 characters.");
 
         RuleFor(info => new Password(info.Password))
-            .SetValidator(passwordValidator);
+            .SetValidator(PasswordValidator.Instance);
     }
 }

@@ -6,13 +6,13 @@ namespace InventoryManagement.Api.Features.Users.ModifyPassword;
 
 public class ModifyPasswordInformationValidator : AbstractValidator<ModifyPasswordInformation>
 {
-    public ModifyPasswordInformationValidator(IValidator<Password> passwordValidator)
+    public ModifyPasswordInformationValidator()
     {
         RuleFor(info => new Password(info.CurrentPassword))
-            .SetValidator(passwordValidator);
+            .SetValidator(PasswordValidator.Instance);
 
         RuleFor(info => new Password(info.NewPassword))
-            .SetValidator(passwordValidator);
+            .SetValidator(PasswordValidator.Instance);
 
         RuleFor(info => info.CurrentPassword.Equals(info.NewPassword))
             .Equal(false)

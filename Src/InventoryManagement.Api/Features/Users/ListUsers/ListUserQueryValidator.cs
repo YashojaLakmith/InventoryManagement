@@ -6,7 +6,7 @@ namespace InventoryManagement.Api.Features.Users.ListUsers;
 
 public class ListUserQueryValidator : AbstractValidator<ListUserQuery>
 {
-    public ListUserQueryValidator(IValidator<RoleName> roleNameValidator)
+    public ListUserQueryValidator()
     {
         RuleFor(q => q.PageNumber)
             .NotEmpty()
@@ -25,7 +25,7 @@ public class ListUserQueryValidator : AbstractValidator<ListUserQuery>
             .WithMessage(@"Role count must be greater than 0 and less than 15");
 
         RuleForEach(q => q.Roles.Select(role => new RoleName(role)))
-            .SetValidator(roleNameValidator);
+            .SetValidator(RoleNameValidator.Instance);
 
         RuleFor(q => q.Roles.Distinct().Count() == q.Roles.Count)
             .Equal(true)
