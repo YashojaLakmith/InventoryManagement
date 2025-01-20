@@ -120,4 +120,85 @@ internal class ValidatorTestCaseSources
         yield return "1074547433";
         yield return "nueludnaym4";
     }
+
+    public static IEnumerable<string?> InvalidBatchNumberSource()
+    {
+        yield return "abcde12345";
+        yield return "This!Is-A_Test";
+        yield return "_START_HERE";
+        yield return "lowercaseexample";
+        yield return "ThisStringIsWayTooLong123456";
+        yield return "HelloWorld!";
+        yield return "Spaces Are Not Allowed";
+        yield return "This#Has@Special&Chars";
+        yield return "mixedCASE123";
+        yield return "(Parentheses)AreNotValid";
+        yield return "";
+        yield return "    ";
+        yield return null;
+    }
+
+    public static IEnumerable<string?> InvalidItemIdSource()
+    {
+        yield return "Hello World!";
+        yield return "this_is_a_test";
+        yield return "example_string";
+        yield return "1234_example";
+        yield return "_leading_underscore";
+        yield return "trailing_underscore_";
+        yield return "lowercase_only";
+        yield return "Special@Chars!";
+        yield return "Contains space";
+        yield return "Upper and Lower";
+        yield return "";
+        yield return "     ";
+        yield return null;
+    }
+
+    public static IEnumerable<decimal?> InvalidPerUnitPriceSource()
+    {
+        yield return -1.87m;
+        yield return 0m;
+        yield return 0.165m;
+        yield return -45m;
+        yield return null;
+    }
+
+    public static IEnumerable<int?> InvalidQuantitySource()
+    {
+        yield return 0;
+        yield return -1;
+        yield return -400;
+        yield return int.MaxValue;
+        yield return null;
+    }
+
+    public static IEnumerable<string> ValidBatchNumberSource()
+    {
+        yield return "HELLO_WORLD";
+        yield return "USERNAME123";
+        yield return "PASSWORD_42";
+        yield return "ACCOUNT_789";
+        yield return "PROFILE1";
+        yield return "DATA_ENTRY2";
+        yield return "TEST_CASE";
+        yield return "VALIDATOR3";
+        yield return "REPORT_2021";
+        yield return "USERID_007";
+    }
+
+    public static IEnumerable<string> ValidItemNumberSource()
+    {
+        yield return "ALPHA_BRAVO";
+        yield return "CHARLIE123";
+        yield return "DELTA_789";
+        yield return "ECHO_456";
+        yield return "FOXTROT7";
+        yield return "GOLF_001";
+        yield return "HOTEL123";
+        yield return "INDIA_9";
+        yield return "JULIET8";
+        yield return "KILO_MIKE";
+    }
+
 }
