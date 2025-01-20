@@ -10,5 +10,8 @@ public class DeleteBatchLineCommandValidator : AbstractValidator<DeleteBatchLine
     {
         RuleFor(x => new BatchNumber(x.BatchNumber))
             .SetValidator(BatchNumberValidator.Instance);
+
+        RuleFor(x => new InventoryItemNumber(x.ItemNumber))
+            .SetValidator(InventoryItemNumberValidator.Instance);
     }
 }
