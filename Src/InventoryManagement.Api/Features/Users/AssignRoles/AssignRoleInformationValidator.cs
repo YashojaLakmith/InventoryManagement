@@ -6,7 +6,7 @@ namespace InventoryManagement.Api.Features.Users.AssignRoles;
 
 public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInformation>
 {
-    public AssignRoleInformationValidator(IValidator<UserId> userIdValidator, IValidator<RoleName> roleNameValidator)
+    public AssignRoleInformationValidator()
     {
         RuleFor(info => info.RolesToAssign.Distinct().Count() == info.RolesToAssign.Count)
             .Equal(true)
@@ -25,9 +25,9 @@ public class AssignRoleInformationValidator : AbstractValidator<AssignRoleInform
             .WithMessage(@"Maximum roles can be assigned at a time is 5");
 
         RuleForEach(info => info.RolesToAssign.Select(role => new RoleName(role)))
-            .SetValidator(roleNameValidator);
+            .SetValidator(RoleNameValidator.Instance);
 
         RuleFor(info => new UserId(info.UserId))
-            .SetValidator(userIdValidator);
+            .SetValidator(UserIdValidator.Instance);
     }
 }

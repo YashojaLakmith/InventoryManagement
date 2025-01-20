@@ -6,9 +6,9 @@ namespace InventoryManagement.Api.Features.InventoryItems.ViewItem;
 
 public class ViewItemQueryValidator : AbstractValidator<ViewItemQuery>
 {
-    public ViewItemQueryValidator(IValidator<InventoryItemNumber> itemNumberValidator)
+    public ViewItemQueryValidator()
     {
         RuleFor(query => new InventoryItemNumber(query.ItemId))
-            .SetValidator(itemNumberValidator);
+            .SetValidator(InventoryItemNumberValidator.Instance);
     }
 }

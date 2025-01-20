@@ -4,7 +4,18 @@ namespace InventoryManagement.Api.Features.Shared.Validators;
 
 public class RoleNameValidator : AbstractValidator<RoleName>
 {
-    public RoleNameValidator()
+    private static RoleNameValidator? _instance;
+
+    public static RoleNameValidator Instance
+    {
+        get
+        {
+            _instance ??= new RoleNameValidator();
+            return _instance;
+        }
+    }
+
+    private RoleNameValidator()
     {
         RuleFor(roleName => roleName.Value)
             .NotEmpty()

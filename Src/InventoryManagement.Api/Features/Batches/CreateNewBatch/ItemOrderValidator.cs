@@ -6,10 +6,10 @@ namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public class ItemOrderValidator : AbstractValidator<ItemOrder>
 {
-    public ItemOrderValidator(IValidator<InventoryItemNumber> itemNumberValidator)
+    public ItemOrderValidator()
     {
         RuleFor(x => new InventoryItemNumber(x.ItemId))
-            .SetValidator(itemNumberValidator);
+            .SetValidator(InventoryItemNumberValidator.Instance);
 
         RuleFor(x => x.CostPerUnit)
             .NotEmpty()

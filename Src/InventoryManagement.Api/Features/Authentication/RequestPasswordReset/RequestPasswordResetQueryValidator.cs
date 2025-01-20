@@ -6,9 +6,9 @@ namespace InventoryManagement.Api.Features.Authentication.RequestPasswordReset;
 
 public class RequestPasswordResetQueryValidator : AbstractValidator<RequestPasswordResetQuery>
 {
-    public RequestPasswordResetQueryValidator(IValidator<Email> emailValidator)
+    public RequestPasswordResetQueryValidator()
     {
         RuleFor(info => new Email(info.EmailAddress))
-            .SetValidator(emailValidator);
+            .SetValidator(EmailValidator.Instance);
     }
 }

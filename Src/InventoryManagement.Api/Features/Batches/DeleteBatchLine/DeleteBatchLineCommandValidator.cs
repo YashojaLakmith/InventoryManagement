@@ -6,9 +6,9 @@ namespace InventoryManagement.Api.Features.Batches.DeleteBatchLine;
 
 public class DeleteBatchLineCommandValidator : AbstractValidator<DeleteBatchLineCommand>
 {
-    public DeleteBatchLineCommandValidator(IValidator<BatchNumber> batchNumberValidator)
+    public DeleteBatchLineCommandValidator()
     {
         RuleFor(x => new BatchNumber(x.BatchNumber))
-            .SetValidator(batchNumberValidator);
+            .SetValidator(BatchNumberValidator.Instance);
     }
 }

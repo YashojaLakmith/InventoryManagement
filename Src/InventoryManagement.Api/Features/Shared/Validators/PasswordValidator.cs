@@ -4,7 +4,18 @@ namespace InventoryManagement.Api.Features.Shared.Validators;
 
 public class PasswordValidator : AbstractValidator<Password>
 {
-    public PasswordValidator()
+    private static PasswordValidator? _instance;
+
+    public static PasswordValidator Instance
+    {
+        get
+        {
+            _instance ??= new PasswordValidator();
+            return _instance;
+        }
+    }
+
+    private PasswordValidator()
     {
         RuleFor(password => password.Value)
             .NotEmpty()

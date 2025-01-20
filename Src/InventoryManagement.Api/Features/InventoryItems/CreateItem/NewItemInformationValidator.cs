@@ -6,10 +6,10 @@ namespace InventoryManagement.Api.Features.InventoryItems.CreateItem;
 
 public class NewItemInformationValidator : AbstractValidator<NewItemInformation>
 {
-    public NewItemInformationValidator(IValidator<InventoryItemNumber> itemNumberValidator)
+    public NewItemInformationValidator()
     {
         RuleFor(info => new InventoryItemNumber(info.ItemId))
-            .SetValidator(itemNumberValidator);
+            .SetValidator(InventoryItemNumberValidator.Instance);
 
         RuleFor(info => info.ItemName)
             .NotEmpty()

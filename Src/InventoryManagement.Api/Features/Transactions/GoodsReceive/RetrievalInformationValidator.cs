@@ -6,13 +6,13 @@ namespace InventoryManagement.Api.Features.Transactions.GoodsReceive;
 
 public class RetrievalInformationValidator : AbstractValidator<RetrievalInformation>
 {
-    public RetrievalInformationValidator(IValidator<BatchNumber> batchNumberValidator, IValidator<InventoryItemNumber> itemNumberValidator)
+    public RetrievalInformationValidator()
     {
         RuleFor(x => new BatchNumber(x.BatchNumber))
-            .SetValidator(batchNumberValidator);
+            .SetValidator(BatchNumberValidator.Instance);
 
         RuleFor(info => new InventoryItemNumber(info.InventoryItemNumber))
-            .SetValidator(itemNumberValidator);
+            .SetValidator(InventoryItemNumberValidator.Instance);
 
         RuleFor(info => info.ItemCount)
             .NotEmpty()

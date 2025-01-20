@@ -6,7 +6,18 @@ public class EmailValidator : AbstractValidator<Email>
 {
     private const string InvalidEmailMessage = @"Provided email is not valid.";
 
-    public EmailValidator()
+    private static EmailValidator? _instance;
+
+    public static EmailValidator Instance
+    {
+        get
+        {
+            _instance ??= new EmailValidator();
+            return _instance;
+        }
+    }
+
+    private EmailValidator()
     {
         RuleFor(email => email.EmailAddress)
             .NotNull()
