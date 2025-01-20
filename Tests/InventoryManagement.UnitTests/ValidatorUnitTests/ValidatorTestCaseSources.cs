@@ -159,7 +159,7 @@ internal class ValidatorTestCaseSources
     {
         yield return -1.87m;
         yield return 0m;
-        yield return 0.165m;
+        yield return -0.165m;
         yield return -45m;
         yield return null;
     }
