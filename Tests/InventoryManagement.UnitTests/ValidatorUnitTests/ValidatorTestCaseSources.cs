@@ -201,4 +201,19 @@ internal class ValidatorTestCaseSources
         yield return "KILO_MIKE";
     }
 
+    public static IEnumerable<string> InvalidItemIdSourceWithoutNull()
+    {
+        yield return "Hello World!";
+        yield return "this_is_a_test";
+        yield return "example_string";
+        yield return "1234_example";
+        yield return "_leading_underscore";
+        yield return "trailing_underscore_";
+        yield return "lowercase_only";
+        yield return "Special@Chars!";
+        yield return "Contains space";
+        yield return "Upper and Lower";
+        yield return "";
+        yield return "     ";
+    }
 }
