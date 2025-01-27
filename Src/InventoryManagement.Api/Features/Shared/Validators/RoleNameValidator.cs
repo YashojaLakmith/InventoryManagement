@@ -2,7 +2,7 @@
 
 namespace InventoryManagement.Api.Features.Shared.Validators;
 
-public class RoleNameValidator : AbstractValidator<RoleName>
+internal class RoleNameValidator : AbstractValidator<RoleName>
 {
     private static RoleNameValidator? _instance;
 

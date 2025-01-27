@@ -2,7 +2,7 @@
 
 namespace InventoryManagement.Api.Features.Shared.Validators;
 
-public class InventoryItemNumberValidator : AbstractValidator<InventoryItemNumber>
+internal class InventoryItemNumberValidator : AbstractValidator<InventoryItemNumber>
 {
     private static InventoryItemNumberValidator? _instance;
 
