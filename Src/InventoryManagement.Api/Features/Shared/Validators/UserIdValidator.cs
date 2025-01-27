@@ -2,7 +2,7 @@
 
 namespace InventoryManagement.Api.Features.Shared.Validators;
 
-public class UserIdValidator : AbstractValidator<UserId>
+internal class UserIdValidator : AbstractValidator<UserId>
 {
     private static UserIdValidator? _instance;
 
