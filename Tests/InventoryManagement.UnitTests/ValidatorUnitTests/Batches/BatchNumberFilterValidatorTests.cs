@@ -21,7 +21,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithItemNumberAsNull_ShouldReturnValidationSuccess()
     {
         // Arrange
-        BatchNumberFilter filter = new(null, true, 1, 1);
+        BatchNumberFilter filter = new(null, true, ValidPageNumberSource().First(), ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -34,7 +34,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithItemNumberIsNotNullAndInvalidItemNumber_ShouldReturnValidationFailure(string itemNumber)
     {
         // Arrange
-        BatchNumberFilter filter = new(itemNumber, true, 1, 1);
+        BatchNumberFilter filter = new(itemNumber, true, ValidPageNumberSource().First(), ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -47,7 +47,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithValidItemNumber_ShouldReturnValidationSuccess(string itemNumber)
     {
         // Arrange
-        BatchNumberFilter filter = new(itemNumber, true, 1, 1);
+        BatchNumberFilter filter = new(itemNumber, true, ValidPageNumberSource().First(), ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -61,7 +61,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithAnyBooleanValueAsIgnoreInactiveFlag_ShouldReturnValidationSuccess(bool ignoreInactive)
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", ignoreInactive, 1, 1);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", ignoreInactive, ValidPageNumberSource().First(), ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -74,7 +74,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithPageNumberLessThanOne_ShouldReturnValidationFailure(int pageNumber)
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, pageNumber, 1);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, pageNumber, ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -87,7 +87,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithPageNumberEqualsIntegerUpperLimit_ShouldReturnValidationFailure()
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, int.MaxValue, 1);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, int.MaxValue, ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -100,7 +100,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithResultsPerPageLessThanTen_ShouldReturnValidationFailure(int resultsPerPage)
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, 1, resultsPerPage);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, ValidPageNumberSource().First(), resultsPerPage);
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -113,7 +113,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithResultsPerPageMoreThanHundred_ShouldReturnValidationFailure(int resultsPerPage)
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, 1, resultsPerPage);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, ValidPageNumberSource().First(), resultsPerPage);
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -126,7 +126,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithValidResultsPerPage_ShouldReturnValidationSuccess(int resultsPerPage)
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, 1, resultsPerPage);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, ValidPageNumberSource().First(), resultsPerPage);
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
@@ -139,7 +139,7 @@ public class BatchNumberFilterValidatorTests
     public async Task Validate_WithValidPageNumber_ShouldReturnValidationSuccess(int pageNumber)
     {
         // Arrange
-        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, pageNumber, 1);
+        BatchNumberFilter filter = new(@"VALID_ITEM_01", true, pageNumber, ValidResultsPerPageSource().First());
 
         // Act
         ValidationResult validationResult = await _validator.ValidateAsync(filter);
