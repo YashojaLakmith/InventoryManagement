@@ -229,7 +229,7 @@ internal class ValidatorTestCaseSources
 
     public static IEnumerable<string?> InvalidMeasurementUnitSource()
     {
-        yield return "hgfhsfjsAnvybda";
+        yield return "hgfhsfjsAnvybdak";
         yield return "ADE1";
         yield return "517";
         yield return "";
