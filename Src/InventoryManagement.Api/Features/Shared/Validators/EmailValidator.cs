@@ -2,7 +2,7 @@
 
 namespace InventoryManagement.Api.Features.Shared.Validators;
 
-public class EmailValidator : AbstractValidator<Email>
+internal class EmailValidator : AbstractValidator<Email>
 {
     private const string InvalidEmailMessage = @"Provided email is not valid.";
 

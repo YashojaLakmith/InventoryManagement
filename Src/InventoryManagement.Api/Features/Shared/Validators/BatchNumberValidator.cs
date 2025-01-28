@@ -2,7 +2,7 @@
 
 namespace InventoryManagement.Api.Features.Shared.Validators;
 
-public class BatchNumberValidator : AbstractValidator<BatchNumber>
+internal class BatchNumberValidator : AbstractValidator<BatchNumber>
 {
     private static BatchNumberValidator? _instance;
 

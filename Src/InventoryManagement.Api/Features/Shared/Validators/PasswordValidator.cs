@@ -2,7 +2,7 @@
 
 namespace InventoryManagement.Api.Features.Shared.Validators;
 
-public class PasswordValidator : AbstractValidator<Password>
+internal class PasswordValidator : AbstractValidator<Password>
 {
     private static PasswordValidator? _instance;
 
