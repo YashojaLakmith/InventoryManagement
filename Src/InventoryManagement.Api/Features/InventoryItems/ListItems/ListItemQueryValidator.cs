@@ -9,7 +9,7 @@ public class ListItemQueryValidator : AbstractValidator<ListItemsQuery>
         RuleFor(query => query.ItemNamePartToSearch)
             .MaximumLength(50)
             .WithMessage("Maximum length of a item name is 50 characters.")
-            .When(query => query.ItemNamePartToSearch != string.Empty && string.IsNullOrWhiteSpace(query.ItemNamePartToSearch));
+            .When(query => query.ItemNamePartToSearch != string.Empty && !string.IsNullOrWhiteSpace(query.ItemNamePartToSearch));
 
         RuleFor(query => query.PageNumber)
             .GreaterThanOrEqualTo(1)
