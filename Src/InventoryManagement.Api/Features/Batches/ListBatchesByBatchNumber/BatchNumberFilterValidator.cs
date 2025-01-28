@@ -24,8 +24,8 @@ public class BatchNumberFilterValidator : AbstractValidator<BatchNumberFilter>
 
         RuleFor(q => q.ResultsPerPage)
             .NotNull()
-            .GreaterThan(0)
+            .GreaterThanOrEqualTo(10)
             .LessThanOrEqualTo(100)
-            .WithMessage(@"Results per page must be greater than 1 and not greater than 100");
+            .WithMessage(@"Results per page must not be less than 10 and must not be greater than 100");
     }
 }
