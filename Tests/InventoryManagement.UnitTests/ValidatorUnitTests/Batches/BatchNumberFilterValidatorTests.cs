@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-using FluentAssertions;
+﻿using FluentAssertions;
 
 using FluentValidation.Results;
 
@@ -152,41 +150,46 @@ public class BatchNumberFilterValidatorTests
 
     private static IEnumerable<int> InvalidPageNumberSource()
     {
-        for (int i = 0; i < 10; i++)
-        {
-            yield return RandomNumberGenerator.GetInt32(int.MinValue, 1);
-        }
+        yield return -55;
+        yield return int.MaxValue;
+        yield return int.MinValue;
+        yield return 0;
+        yield return -1;
     }
 
     private static IEnumerable<int> ValidPageNumberSource()
     {
-        for (int i = 0; i < 20; i++)
-        {
-            yield return RandomNumberGenerator.GetInt32(1, int.MaxValue);
-        }
+        yield return 1;
+        yield return int.MaxValue - 1;
+        yield return 10;
+        yield return 1007;
+        yield return 99;
     }
 
     private static IEnumerable<int> InvalidResultsPerPageSourceByLowerBound()
     {
-        for (int i = 0; i < 10; i++)
-        {
-            yield return RandomNumberGenerator.GetInt32(int.MinValue, 10);
-        }
+        yield return 9;
+        yield return int.MinValue;
+        yield return 0;
+        yield return -10;
+        yield return 5;
     }
 
     private static IEnumerable<int> InvalidResultsPerPageSourceByUpperBound()
     {
-        for (int i = 0; i < 10; i++)
-        {
-            yield return RandomNumberGenerator.GetInt32(101, int.MaxValue);
-        }
+        yield return 101;
+        yield return int.MaxValue;
+        yield return 1000;
+        yield return 404;
+        yield return 804692;
     }
 
     private static IEnumerable<int> ValidResultsPerPageSource()
     {
-        for (int i = 0; i < 20; i++)
-        {
-            yield return RandomNumberGenerator.GetInt32(10, 101);
-        }
+        yield return 10;
+        yield return 100;
+        yield return 53;
+        yield return 91;
+        yield return 23;
     }
 }
