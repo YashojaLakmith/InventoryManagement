@@ -24,7 +24,7 @@ public class NewItemInformationValidator : AbstractValidator<NewItemInformation>
             .WithMessage("Measurement unit cannot be empty");
 
         RuleFor(info => info.MeasurementUnit)
-            .Length(1, 10)
+            .Length(1, 15)
             .WithMessage(@"Measurement unit must be between 1 and 10 characters");
     }
 }
