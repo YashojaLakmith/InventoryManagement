@@ -10,7 +10,7 @@ public class BatchNumberFilterValidator : AbstractValidator<BatchNumberFilter>
     {
         RuleFor(x => new InventoryItemNumber(x.InventoryItemId!))
             .SetValidator(InventoryItemNumberValidator.Instance)
-            .When(x => !string.IsNullOrWhiteSpace(x.InventoryItemId));
+            .When(x => x.InventoryItemId != null);
 
         RuleFor(x => x.IgnoreInactive)
             .NotNull()
