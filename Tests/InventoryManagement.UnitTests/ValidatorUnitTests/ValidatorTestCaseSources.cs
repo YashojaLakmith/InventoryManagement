@@ -159,7 +159,7 @@ internal class ValidatorTestCaseSources
     {
         yield return -1.87m;
         yield return 0m;
-        yield return 0.165m;
+        yield return -0.165m;
         yield return -45m;
         yield return null;
     }
@@ -201,4 +201,67 @@ internal class ValidatorTestCaseSources
         yield return "KILO_MIKE";
     }
 
+    public static IEnumerable<string> InvalidItemIdSourceWithoutNull()
+    {
+        yield return "Hello World!";
+        yield return "this_is_a_test";
+        yield return "example_string";
+        yield return "1234_example";
+        yield return "_leading_underscore";
+        yield return "trailing_underscore_";
+        yield return "lowercase_only";
+        yield return "Special@Chars!";
+        yield return "Contains space";
+        yield return "Upper and Lower";
+        yield return "";
+        yield return "     ";
+    }
+
+    public static IEnumerable<string?> InvalidItemNameSource()
+    {
+        yield return "a1";
+        yield return "X";
+        yield return "nbfhdjfjsbfdsbfdfnstglqit64bx'7-cga21,b trnc=g5ras8";
+        yield return "";
+        yield return "     ";
+        yield return null;
+    }
+
+    public static IEnumerable<string?> InvalidMeasurementUnitSource()
+    {
+        yield return "hgfhsfjsAnvybda";
+        yield return "ADE1";
+        yield return "517";
+        yield return "";
+        yield return "     ";
+        yield return null;
+    }
+
+    public static IEnumerable<string> ValidItemNameSource()
+    {
+        yield return "Car";
+        yield return "0.5 inch cables";
+        yield return "Computer + Monitor";
+        yield return "Oil";
+        yield return "Gasoline";
+        yield return "nbfhdjfjsbfdsbfdfnstglqit64bx'7-cga21,b trnc=g5ras";
+        yield return "Salt";
+        yield return "Wiring Equipment";
+        yield return "Table fans";
+        yield return "nhdfdf6f";
+    }
+
+    public static IEnumerable<string> ValidMeasurementUnitSource()
+    {
+        yield return "Meters";
+        yield return "UNITS";
+        yield return "MiliMeters";
+        yield return "Grams";
+        yield return "barfluvtsngtcph";
+        yield return "A";
+        yield return "Nos";
+        yield return "yArds";
+        yield return "litres";
+        yield return "Each";
+    }
 }
