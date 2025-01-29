@@ -3,20 +3,16 @@ using InventoryManagement.Api.Features.Batches.ListBatchesByBatchNumber;
 using InventoryManagement.Api.Features.InventoryItems;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Hybrid;
 
 namespace InventoryManagement.Api.Infrastructure.Database.Repositories;
 
 public class BatchRepository : IBatchRepository
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly HybridCache _hybridCache;
-    private static readonly HybridCacheEntryOptions BatchCountEntryOptions = new() { Expiration = TimeSpan.FromHours(2) };
 
-    public BatchRepository(ApplicationDbContext dbContext, HybridCache hybridCache)
+    public BatchRepository(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
-        _hybridCache = hybridCache;
     }
 
     public void AddBatchLines(IReadOnlyCollection<Batch> batchLines)
@@ -49,12 +45,7 @@ public class BatchRepository : IBatchRepository
             .Take(filter.ResultsPerPage)
             .ToListAsync(cancellationToken);
 
-        int totalCount = await _hybridCache.GetOrCreateAsync(
-            @$"batch-count-{filter.IgnoreInactive}",
-            async cancel => await projectedQuery.CountAsync(cancel),
-            BatchCountEntryOptions,
-            [@"count:batch"],
-            cancellationToken);
+        int totalCount = await projectedQuery.CountAsync(cancellationToken);
 
         return new BatchNumberListResult(queryResult, filter.PageNumber, queryResult.Count, totalCount);
     }
