@@ -3,6 +3,8 @@ using System.Security.Claims;
 
 using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared;
+using InventoryManagement.Api.Features.Shared.Abstractions;
 using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Caching;
 using InventoryManagement.Api.Infrastructure.Database;
@@ -36,6 +38,7 @@ public class Program
         builder.Services.AddMediatR(o => o.RegisterServicesFromAssembly(assembly));
         builder.Services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Singleton);
         builder.Services.AddSingleton<IEmailSender<User>, EmailSender>();
+        builder.Services.AddSingleton<ITimeProvider, Features.Shared.TimeProvider>();
 
         WebApplication app = builder.Build();
 

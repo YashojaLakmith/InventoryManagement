@@ -1,21 +1,23 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Abstractions;
+
 namespace InventoryManagement.Api.Features.Transactions.CreateTransactionReport;
 
 public class TransactionReportFilterValidator : AbstractValidator<TransactionReportFilters>
 {
-    public TransactionReportFilterValidator()
+    public TransactionReportFilterValidator(ITimeProvider timeProvider)
     {
         RuleFor(info => info.SinceDate)
             .NotNull()
             .WithMessage(@"From date is required.")
-            .LessThanOrEqualTo(DateTime.UtcNow)
+            .LessThanOrEqualTo(timeProvider.CurrentUtcTime)
             .WithMessage(@"From date must not be a future date.");
 
         RuleFor(info => info.ToDate)
             .NotNull()
             .WithMessage(@"To date is required.")
-            .GreaterThan(DateTime.UtcNow)
+            .GreaterThan(timeProvider.CurrentUtcTime)
             .WithMessage(@"From date must not be a past date.");
 
         RuleFor(info => info.TransactionTypes)
