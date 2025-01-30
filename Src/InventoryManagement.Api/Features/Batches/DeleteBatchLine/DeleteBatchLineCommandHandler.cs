@@ -7,8 +7,6 @@ using InventoryManagement.Api.Errors;
 
 using MediatR;
 
-using Microsoft.Extensions.Caching.Hybrid;
-
 namespace InventoryManagement.Api.Features.Batches.DeleteBatchLine;
 
 public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineCommand, Result>
@@ -17,20 +15,17 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
     private readonly ILogger<DeleteBatchLineCommandHandler> _logger;
     private readonly IBatchRepository _batchRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly HybridCache _hybridCache;
 
     public DeleteBatchLineCommandHandler(
         IValidator<DeleteBatchLineCommand> validator,
         ILogger<DeleteBatchLineCommandHandler> logger,
         IBatchRepository batchRepository,
-        IUnitOfWork unitOfWork,
-        HybridCache hybridCache)
+        IUnitOfWork unitOfWork)
     {
         _validator = validator;
         _logger = logger;
         _batchRepository = batchRepository;
         _unitOfWork = unitOfWork;
-        _hybridCache = hybridCache;
     }
 
     public async Task<Result> Handle(DeleteBatchLineCommand request, CancellationToken cancellationToken)
@@ -56,7 +51,6 @@ public class DeleteBatchLineCommandHandler : IRequestHandler<DeleteBatchLineComm
 
         _batchRepository.RemoveBatchLine(existingBatch);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        await _hybridCache.RemoveByTagAsync(@"count:batch", cancellationToken);
 
         return Result.Ok();
     }
