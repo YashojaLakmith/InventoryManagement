@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Api.Infrastructure.Database;
 
-public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUnitOfWork
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, IdentityRole<int>, int>(options), IUnitOfWork
 {
     public DbSet<InventoryItem> InventoryItems { get; private set; }
     public DbSet<Batch> Batches { get; private set; }
@@ -20,12 +20,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseNpgsql(@"Host=127.0.0.1;Database=InventoryManagement;Username=postgres;Password=postgres;");
-        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
     }
 
     public void ClearChanges()

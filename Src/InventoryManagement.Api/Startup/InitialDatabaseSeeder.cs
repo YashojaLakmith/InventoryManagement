@@ -1,11 +1,7 @@
-﻿using System.Data;
-
-using InventoryManagement.Api.Features.Users;
+﻿using InventoryManagement.Api.Features.Users;
 using InventoryManagement.Api.Infrastructure.Database;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace InventoryManagement.Api.Startup;
 
@@ -30,17 +26,14 @@ public class InitialDatabaseSeeder
 
     public async Task SeedDatabaseAsync()
     {
-        await using IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         try
         {
             await SeedRolesAsync();
             await CreateSuperUser();
-            await transaction.CommitAsync();
         }
         catch (Exception e)
         {
             _logger.LogCritical(@"Database seeding error. {error}", e);
-            await transaction.RollbackAsync();
             throw;
         }
     }

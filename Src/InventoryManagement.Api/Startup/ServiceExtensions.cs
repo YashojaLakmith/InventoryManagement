@@ -27,12 +27,12 @@ public static class ServiceExtensions
         services.AddSingleton<ITimeProvider, Features.Shared.TimeProvider>();
     }
 
-    public static void AddScopedServices(this IServiceCollection services)
+    public static void AddScopedServices(this WebApplicationBuilder builder)
     {
-        ConfigureClaimsPrincipalInjection(services);
-        services.AddDbContext<ApplicationDbContext>();
-        services.AddRepositoryImplementations();
-        services.AddReportGenerators();
+        ConfigureClaimsPrincipalInjection(builder.Services);
+        builder.Services.AddRepositoryImplementations();
+        builder.Services.AddReportGenerators();
+        builder.AddNpgsqlDbContext<ApplicationDbContext>("InventoryManagementDb");
     }
 
     public static void AddTransientServices(this IServiceCollection services)
@@ -85,11 +85,11 @@ public static class ServiceExtensions
         services.AddAuthorization();
     }
 
-    public static void ConfigureCaching(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureCaching(this WebApplicationBuilder builder)
     {
-        services.AddDistributedMemoryCache();
+        builder.AddRedisDistributedCache("Redis");
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-        services.AddHybridCache();
+        builder.Services.AddHybridCache();
 #pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     }
 

@@ -10,13 +10,13 @@ public class Program
     public static async Task Main()
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
-
-        builder.Services.ConfigureCaching(builder.Configuration);
+        builder.ConfigureCaching();
         builder.Services.ConfigureAuthentication();
+        builder.AddServiceDefaults();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi();
         builder.Services.AddSingletonServices();
-        builder.Services.AddScopedServices();
+        builder.AddScopedServices();
         builder.Services.AddTransientServices();
 
         WebApplication app = builder.Build();
