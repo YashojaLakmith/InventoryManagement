@@ -14,16 +14,11 @@ public class IssuanceInformationValidator : AbstractValidator<IssuanceInformatio
         RuleFor(info => new InventoryItemNumber(info.ItemId))
             .SetValidator(InventoryItemNumberValidator.Instance);
 
-        RuleFor(info => info.NumberOfItemsToIssue)
-            .NotEmpty()
-            .WithMessage(@"Number of items to issue cannot be empty");
 
         RuleFor(info => info.NumberOfItemsToIssue)
             .GreaterThanOrEqualTo(1)
-            .WithMessage(@"Number of items to issue should at least be 1");
-
-        RuleFor(info => info.NumberOfItemsToIssue)
-            .LessThanOrEqualTo(int.MaxValue)
-            .WithMessage(@$"Number of items to issue should at most {int.MaxValue}");
+            .WithMessage(@"Number of items to issue should not be less than 1")
+            .LessThan(int.MaxValue)
+            .WithMessage(@$"Number of items to issue should at most {int.MaxValue - 1}");
     }
 }
