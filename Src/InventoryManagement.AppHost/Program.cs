@@ -9,11 +9,10 @@ internal class Program
 
         IResourceBuilder<PostgresServerResource> postgresInstance = builder.AddPostgres("Postgres")
             .WithImage("postgres", "16")
-            .WithDataVolume();
+            .WithDataVolume("pg-inventoryManagement-data");
         IResourceBuilder<PostgresDatabaseResource> postgresDb = postgresInstance.AddDatabase("InventoryManagementDb");
 
-        builder.AddProject<Projects.InventoryManagement_Api>("InventoryManagementApi")
-            .WithExternalHttpEndpoints()
+        builder.AddProject<Projects.InventoryManagement_Api>("InventoryManagementApi", "http")
             .WithReference(redisCache)
             .WithReference(postgresDb)
             .WaitFor(redisCache)
