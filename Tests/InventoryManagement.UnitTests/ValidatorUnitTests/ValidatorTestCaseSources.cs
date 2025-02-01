@@ -343,4 +343,51 @@ internal class ValidatorTestCaseSources
         yield return "X.Y-Z";
         yield return "This is a valid string with letters spaces dots. and dashes- all in order";
     }
+
+    public static IEnumerable<string> ValidRoleNameSource()
+    {
+        yield return "Super user";
+        yield return "Admin";
+        yield return "BusinessOwner";
+        yield return "USER MANAGER";
+        yield return "User";
+        yield return "customer";
+    }
+
+    public static IEnumerable<string?> InvalidRoleNameSource()
+    {
+        yield return null;
+        yield return string.Empty;
+        yield return "     ";
+        yield return "Super  User";
+        yield return " UserManager";
+        yield return "Customer ";
+        yield return "Admin-Manager";
+        yield return "business_owner";
+        yield return "User,Admin,Customer";
+    }
+
+    public static IEnumerable<string> SuperUserRoleNameSource()
+    {
+        yield return "SUPER USER";
+        yield return "Super User";
+        yield return "super user";
+        yield return "super User";
+    }
+
+    public static IEnumerable<string> DuplicateRoleNameSource()
+    {
+        yield return "Super user";
+        yield return "Admin";
+        yield return "BusinessOwner";
+        yield return "USER MANAGER";
+        yield return "User";
+        yield return "customer";
+        yield return "super user";
+        yield return "AdMin";
+        yield return "Businessowner";
+        yield return "USER mANAGER";
+        yield return "UseR";
+        yield return "CuStomer";
+    }
 }
