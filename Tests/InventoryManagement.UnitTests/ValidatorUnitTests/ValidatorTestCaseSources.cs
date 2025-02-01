@@ -264,4 +264,22 @@ internal class ValidatorTestCaseSources
         yield return "litres";
         yield return "Each";
     }
+
+    public static IEnumerable<int> InvalidUserIdSource()
+    {
+        yield return 0;
+        yield return int.MinValue;
+        yield return -1;
+        yield return -37;
+        yield return -2459;
+    }
+
+    public static IEnumerable<int> ValidUserIdSource()
+    {
+        yield return 1;
+        yield return int.MaxValue;
+        yield return 37;
+        yield return 2459;
+        yield return 31913;
+    }
 }
