@@ -10,7 +10,9 @@ public class ListUserQueryValidator : AbstractValidator<ListUserQuery>
     {
         RuleFor(q => q.PageNumber)
             .GreaterThan(0)
-            .WithMessage("Page number must be greater than 0");
+            .WithMessage("Page number must be greater than 0")
+            .LessThan(int.MaxValue)
+            .WithMessage($"Page number must be less than {int.MaxValue}");
 
         RuleFor(q => q.PageSize)
             .GreaterThanOrEqualTo(10)
