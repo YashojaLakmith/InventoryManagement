@@ -8,26 +8,26 @@ public class RemoveRoleInformationValidator : AbstractValidator<RemoveRoleInform
 {
     public RemoveRoleInformationValidator()
     {
-        RuleFor(info => info.RolesToRemove.Distinct().Count() == info.RolesToRemove.Count)
-            .Equal(true)
-            .WithMessage(@"There are duplicates role names provided.");
+        RuleFor(info => info.RolesToRemove)
+            .Must(roles => !AreThereDuplicateRoleNames(roles))
+            .WithMessage("There are duplicates role names provided.")
+            .Must(roles => !roles.Any(r => r.Equals(Roles.SuperUser, StringComparison.OrdinalIgnoreCase)))
+            .WithMessage("Super user roles are non-modifiable.")
+            .Must(roles => roles.Count < 6)
+            .WithMessage("Maximum roles can be assigned at a time is 5")
+            .ForEach(role => role.SetValidator(RoleNameValidator.Instance))
+            .When(info => info.RolesToRemove.Any(r => r != null))
+            .Must(roles => !roles.Any(r => r == null))
+            .WithMessage("Role name should not be null");
 
-        RuleFor(info => info.RolesToRemove.Count)
-            .GreaterThanOrEqualTo(1)
-            .WithMessage(@"At least one role should be provided");
-
-        RuleFor(info => info.RolesToRemove.Count)
-            .LessThanOrEqualTo(5)
-            .WithMessage(@"Maximum roles can be removed at a time is 5");
-
-        RuleFor(info => info.RolesToRemove.Contains(Roles.SuperUser, StringComparer.OrdinalIgnoreCase))
-            .Equal(false)
-            .WithMessage(@"Super user roles are non-modifiable.");
-
-        RuleForEach(info => info.RolesToRemove.Select(role => new RoleName(role)))
-            .SetValidator(RoleNameValidator.Instance);
+        RuleFor(info => info.RolesToRemove)
+            .Must(roles => roles.Count > 0)
+            .WithMessage("At least one role should be provided");
 
         RuleFor(info => new UserId(info.UserId))
             .SetValidator(UserIdValidator.Instance);
     }
+
+    private static bool AreThereDuplicateRoleNames(IReadOnlyCollection<string> roleNames)
+        => roleNames.DistinctBy(role => role.ToLower()).Count() != roleNames.Count;
 }
