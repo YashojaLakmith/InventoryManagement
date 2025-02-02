@@ -8,14 +8,18 @@ public class ModifyPasswordInformationValidator : AbstractValidator<ModifyPasswo
 {
     public ModifyPasswordInformationValidator()
     {
-        RuleFor(info => new Password(info.CurrentPassword))
-            .SetValidator(PasswordValidator.Instance);
-
         RuleFor(info => new Password(info.NewPassword))
-            .SetValidator(PasswordValidator.Instance);
+            .SetValidator(PasswordValidator.Instance)
+            .When(info => info.NewPassword != null)
+            .Must(pw => pw.Value != null)
+            .WithMessage("New password is required.");
 
-        RuleFor(info => info.CurrentPassword.Equals(info.NewPassword))
-            .Equal(false)
-            .WithMessage(@"Current password and new password must be different");
+        RuleFor(info => new Password(info.CurrentPassword))
+            .Must((info, currentPassword) => currentPassword.Value != info.NewPassword)
+            .WithMessage("Current password and new password must be different.")
+            .SetValidator(PasswordValidator.Instance)
+            .When(info => info.CurrentPassword != null)
+            .Must(pw => pw.Value != null)
+            .WithMessage("Current password is required");
     }
 }
