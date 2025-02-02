@@ -346,7 +346,7 @@ internal class ValidatorTestCaseSources
 
     public static IEnumerable<string> ValidRoleNameSource()
     {
-        yield return "Super user";
+        yield return "Root user";
         yield return "Admin";
         yield return "BusinessOwner";
         yield return "USER MANAGER";
