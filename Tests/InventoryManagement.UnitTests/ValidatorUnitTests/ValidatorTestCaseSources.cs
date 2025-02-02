@@ -264,4 +264,130 @@ internal class ValidatorTestCaseSources
         yield return "litres";
         yield return "Each";
     }
+
+    public static IEnumerable<int> InvalidUserIdSource()
+    {
+        yield return 0;
+        yield return int.MinValue;
+        yield return -1;
+        yield return -37;
+        yield return -2459;
+    }
+
+    public static IEnumerable<int> ValidUserIdSource()
+    {
+        yield return 1;
+        yield return int.MaxValue;
+        yield return 37;
+        yield return 2459;
+        yield return 31913;
+    }
+
+    public static IEnumerable<string?> InvalidUserNameSource()
+    {
+        // 1. Contains two consecutive dots.
+        yield return "A..B";
+        // 2. Contains two consecutive dashes.
+        yield return "B--C";
+        // 3. Contains two consecutive spaces.
+        yield return "C  D";
+        // 4. Does not start with a letter (starts with a digit).
+        yield return "1Test";
+        // 5. Does not start with a letter (starts with a dot).
+        yield return ".Hello";
+        // 6. Does not start with a letter (starts with a dash).
+        yield return "-World";
+        // 7. Contains an illegal character '#' (only letters, space, dot, and dash allowed).
+        yield return "A#Test";
+        // 8. Contains an illegal character '@'.
+        yield return "Test@";
+        // 9. Exceeds the maximum allowed length (101 characters: 1 letter + 100 'a's).
+        yield return "A" + new string('a', 100);
+        // 10. Another example with repeated dots.
+        yield return "Z..Z";
+        // 11. Another example with repeated dashes.
+        yield return "Y--Y";
+        // 12. Another example with repeated spaces.
+        yield return "X  X";
+        // 13. Contains a newline character (not one of the allowed characters).
+        yield return "Hello\nWorld";
+        // 14. Contains an underscore, which is not allowed.
+        yield return "A_B";
+        // 15. Contains a repeated dot in the middle.
+        yield return "A..B.C";
+        // 16. Contains both repeated dots and repeated dashes.
+        yield return "Ab..--Cd";
+        // 17. Ends with repeated dots.
+        yield return "Ab..";
+        // 18. Ends with repeated dashes.
+        yield return "Ab--";
+        // 19. Ends with repeated spaces.
+        yield return "Ab  ";
+        // 20. Contains a comma, which is not in the allowed character set.
+        yield return "Hello, World";
+        yield return null;
+        yield return "";
+        yield return "     ";
+    }
+
+    public static IEnumerable<string> ValidUserNameSource()
+    {
+        yield return "A";
+        yield return "Hello";
+        yield return "Hello World";
+        yield return "John-Doe";
+        yield return "Alice.Bob";
+        yield return "A B.C-D";
+        yield return "Alpha Bravo";
+        yield return "Valid.Test-Case";
+        yield return "X.Y-Z";
+        yield return "This is a valid string with letters spaces dots. and dashes- all in order";
+    }
+
+    public static IEnumerable<string> ValidRoleNameSource()
+    {
+        yield return "Root user";
+        yield return "Admin";
+        yield return "BusinessOwner";
+        yield return "USER MANAGER";
+        yield return "User";
+        yield return "customer";
+    }
+
+    public static IEnumerable<string?> InvalidRoleNameSource()
+    {
+        yield return null;
+        yield return string.Empty;
+        yield return "     ";
+        yield return "Super  User";
+        yield return " UserManager";
+        yield return "Customer ";
+        yield return "Admin-Manager";
+        yield return "business_owner";
+        yield return "User,Admin,Customer";
+    }
+
+    public static IEnumerable<string> SuperUserRoleNameSource()
+    {
+        yield return "SUPER USER";
+        yield return "Super User";
+        yield return "super user";
+        yield return "super User";
+    }
+
+    public static IEnumerable<string> DuplicateRoleNameSource()
+    {
+        yield return "Super user";
+        yield return "Admin";
+        yield return "BusinessOwner";
+        yield return "USER MANAGER";
+        yield return "User";
+        yield return "customer";
+        yield return "super user";
+        yield return "AdMin";
+        yield return "Businessowner";
+        yield return "USER mANAGER";
+        yield return "UseR";
+        yield return "CuStomer";
+    }
 }

@@ -15,15 +15,9 @@ public class RetrievalInformationValidator : AbstractValidator<RetrievalInformat
             .SetValidator(InventoryItemNumberValidator.Instance);
 
         RuleFor(info => info.ItemCount)
-            .NotEmpty()
-            .WithMessage(@"Number of items to issue cannot be empty");
-
-        RuleFor(info => info.ItemCount)
             .GreaterThanOrEqualTo(1)
-            .WithMessage(@"Number of items to issue should at least be 1");
-
-        RuleFor(info => info.ItemCount)
-            .LessThanOrEqualTo(int.MaxValue)
-            .WithMessage(@$"Number of items to issue should at most {int.MaxValue}");
+            .WithMessage(@"Number of items to issue should not be less than 1")
+            .LessThan(int.MaxValue)
+            .WithMessage(@$"Number of items to issue should at most {int.MaxValue - 1}");
     }
 }
