@@ -1,19 +1,17 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Batches.CreateNewBatch;
 
 public class NewBatchInformationValidator : AbstractValidator<NewBatchInformation>
 {
-    public NewBatchInformationValidator(IValidator<ItemOrder> orderValidator)
-    {
-        RuleFor(x => x.BatchNumber)
-            .NotNull()
-            .NotEmpty()
-            .WithMessage(@"Batch number is required.");
+    private static readonly ItemOrderValidator OrderValidator = new();
 
-        RuleFor(x => x.BatchNumber)
-            .Length(1, 25)
-            .WithMessage(@"Batch number should be no less than 1 character or more than 25 characters.");
+    public NewBatchInformationValidator()
+    {
+        RuleFor(x => new BatchNumber(x.BatchNumber))
+            .SetValidator(BatchNumberValidator.Instance);
 
         RuleFor(x => x.ItemOrders.Count)
             .GreaterThanOrEqualTo(1)
@@ -24,6 +22,6 @@ public class NewBatchInformationValidator : AbstractValidator<NewBatchInformatio
             .WithMessage(@"A single batch cannot have line item of same inventory item.");
 
         RuleForEach(x => x.ItemOrders)
-            .SetValidator(orderValidator);
+            .SetValidator(OrderValidator);
     }
 }

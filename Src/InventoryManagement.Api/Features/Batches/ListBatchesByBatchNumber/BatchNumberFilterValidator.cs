@@ -1,16 +1,16 @@
 ﻿using FluentValidation;
 
+using InventoryManagement.Api.Features.Shared.Validators;
+
 namespace InventoryManagement.Api.Features.Batches.ListBatchesByBatchNumber;
 
 public class BatchNumberFilterValidator : AbstractValidator<BatchNumberFilter>
 {
     public BatchNumberFilterValidator()
     {
-        RuleFor(x => x.InventoryItemId)
-            .MinimumLength(1)
-            .MaximumLength(25)
-            .WithMessage(@"Item id must have at least 1 character and less than 25 characters.")
-            .When(x => !string.IsNullOrWhiteSpace(x.InventoryItemId));
+        RuleFor(x => new InventoryItemNumber(x.InventoryItemId!))
+            .SetValidator(InventoryItemNumberValidator.Instance)
+            .When(x => x.InventoryItemId != null);
 
         RuleFor(x => x.IgnoreInactive)
             .NotNull()
@@ -24,8 +24,8 @@ public class BatchNumberFilterValidator : AbstractValidator<BatchNumberFilter>
 
         RuleFor(q => q.ResultsPerPage)
             .NotNull()
-            .GreaterThan(0)
+            .GreaterThanOrEqualTo(10)
             .LessThanOrEqualTo(100)
-            .WithMessage(@"Results per page must be greater than 1 and not greater than 100");
+            .WithMessage(@"Results per page must not be less than 10 and must not be greater than 100");
     }
 }
