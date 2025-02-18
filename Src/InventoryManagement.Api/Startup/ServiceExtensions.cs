@@ -32,7 +32,7 @@ public static class ServiceExtensions
         ConfigureClaimsPrincipalInjection(builder.Services);
         builder.Services.AddRepositoryImplementations();
         builder.Services.AddReportGenerators();
-        builder.AddNpgsqlDbContext<ApplicationDbContext>("InventoryManagementDb");
+        builder.AddNpgsqlDbContext<ApplicationDbContext>("inventory-management-db");
     }
 
     public static void AddTransientServices(this IServiceCollection services)
@@ -87,7 +87,7 @@ public static class ServiceExtensions
 
     public static void ConfigureCaching(this WebApplicationBuilder builder)
     {
-        builder.AddRedisDistributedCache("Redis");
+        builder.AddRedisDistributedCache("redis-cache");
 #pragma warning disable EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         builder.Services.AddHybridCache();
 #pragma warning restore EXTEXP0018 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
